@@ -1,9 +1,11 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from .models import Lift
+from .models import Workout, Exercise, LiftEntry
 
-#creation of signup form and error handling 
+# -------------------------
+# SIGN UP FORM (KEEP THIS)
+# -------------------------
 class SignUpForm(forms.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput)
     password2 = forms.CharField(widget=forms.PasswordInput)
@@ -32,7 +34,22 @@ class SignUpForm(forms.ModelForm):
             user.save()
         return user
 
-class LiftForm(forms.ModelForm):
+
+# -------------------------
+# NEW WORKOUT FORM
+# -------------------------
+class WorkoutForm(forms.ModelForm):
     class Meta:
-        model = Lift
-        fields = ["name", "weight", "reps", "sets"]
+        model = Workout
+        fields = ["name"]
+
+
+# -------------------------
+# NEW LIFT ENTRY FORM
+# -------------------------
+class LiftEntryForm(forms.Form):
+    workout_id = forms.IntegerField(widget=forms.HiddenInput)
+    exercise_name = forms.CharField(max_length=80)
+    weight = forms.DecimalField(max_digits=6, decimal_places=2)
+    reps = forms.IntegerField(min_value=1)
+    sets = forms.IntegerField(min_value=1, initial=3)

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1>Create Workout</h1>
+  <p class="muted">Examples: Back + Chest, Push Day, Legs</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Workout</button>
+  </form>
+</div>
+
+{% endblock %}

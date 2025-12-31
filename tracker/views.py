@@ -1,99 +1,60 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
 from django.contrib import messages
-from .forms import SignUpForm, LiftForm
-from .models import Lift
-
-from openai import OpenAI
-
-#view created using openai api
-
-def home(request):
-    return render(request, "home.html")
-
-def signup_view(request):
-    if request.method == "POST":
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Account created. Please log in.")
-            return redirect("login")
-    else:
-        form = SignUpForm()
-    return render(request, "signup.html", {"form": form})
-
-def login_view(request):
-    if request.method == "POST":
-        username = request.POST.get("username", "")
-        password = request.POST.get("password", "")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect("dashboard")
-        messages.error(request, "Invalid username or password.")
-    return render(request, "login.html")
-
-def logout_view(request):
-    logout(request)
-    return redirect("home")
-
-def _ai_progression_tip(lifts):
-    if not settings.GROQ_API_KEY:
-        return "Tip: Aim to add +5 lb next week if form stays solid, or add +1 rep per set."
-
-    summary = []
-    for l in lifts:
-        summary.append(f"{l.name}: {l.weight} lb x {l.reps} reps x {l.sets} sets")
-
-    prompt = (
-        "You are a strength coach. Give ONE short progressive overload suggestion for next session.\n"
-        "Rules: be safe, prioritize good form, suggest either +5 lb OR +1 rep OR +1 set.\n"
-        "User's current lifts:\n"
-        + "\n".join(summary)
-        + "\nReturn 1-2 sentences max."
-    )
-
-    client = OpenAI(
-        api_key=settings.GROQ_API_KEY,
-        base_url="https://api.groq.com/openai/v1",
-    )
-
-    resp = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.4,
-        max_tokens=80,
-    )
-    return resp.choices[0].message.content.strip()
+from .models import Workout, Exercise, LiftEntry
+from .forms import WorkoutForm, LiftEntryForm
 
 @login_required
 def dashboard(request):
-    lifts = Lift.objects.filter(user=request.user).order_by("name")
-    tip = _ai_progression_tip(lifts)
-    return render(request, "dashboard.html", {"lifts": lifts, "tip": tip})
+    workouts = Workout.objects.filter(user=request.user).order_by("name")
+    recent = LiftEntry.objects.filter(user=request.user)[:10]
+    return render(request, "dashboard.html", {"workouts": workouts, "recent": recent})
 
 @login_required
-def add_lift(request):
+def create_workout(request):
     if request.method == "POST":
-        form = LiftForm(request.POST)
+        form = WorkoutForm(request.POST)
         if form.is_valid():
-            lift = form.save(commit=False)
-            lift.user = request.user
+            w = form.save(commit=False)
+            w.user = request.user
             try:
-                lift.save()
+                w.save()
                 return redirect("dashboard")
-            except Exception:
-                messages.error(request, "You already have a lift with that name. Try a different name.")
+            except:
+                messages.error(request, "Workout name already exists.")
     else:
-        form = LiftForm()
-    return render(request, "add_lift.html", {"form": form})
+        form = WorkoutForm()
+    return render(request, "create_workout.html", {"form": form})
 
 @login_required
-def delete_lift(request, lift_id):
-    lift = get_object_or_404(Lift, id=lift_id, user=request.user)
-    if request.method == "POST":
-        lift.delete()
+def workout_detail(request, workout_id):
+    workout = get_object_or_404(Workout, id=workout_id, user=request.user)
+    entries = LiftEntry.objects.filter(user=request.user, workout=workout)[:50]
+    form = LiftEntryForm(initial={"workout_id": workout.id})
+    return render(request, "workout_detail.html", {"workout": workout, "entries": entries, "form": form})
+
+@login_required
+def add_entry(request):
+    if request.method != "POST":
         return redirect("dashboard")
-    return render(request, "delete_lift.html", {"lift": lift})
+
+    form = LiftEntryForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid entry.")
+        return redirect("dashboard")
+
+    workout = get_object_or_404(Workout, id=form.cleaned_data["workout_id"], user=request.user)
+
+    ex_name = form.cleaned_data["exercise_name"].strip()
+    exercise, _ = Exercise.objects.get_or_create(user=request.user, name=ex_name)
+
+    LiftEntry.objects.create(
+        user=request.user,
+        workout=workout,
+        exercise=exercise,
+        weight=form.cleaned_data["weight"],
+        reps=form.cleaned_data["reps"],
+        sets=form.cleaned_data["sets"],
+    )
+
+    return redirect("workout_detail", workout_id=workout.id)

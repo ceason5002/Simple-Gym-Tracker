@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h1>{{ workout.name }}</h1>
+  <p class="muted">Add exercises performed in this workout.</p>
+</div>
+
+<div class="card">
+  <h2>Add Lift</h2>
+
+  <form method="post" action="{% url 'add_entry' %}">
+    {% csrf_token %}
+    {{ form.workout_id }}
+
+    <p>
+      <label>Exercise</label>
+      <input name="exercise_name" required>
+    </p>
+
+    <p>
+      <label>Weight</label>
+      <input type="number" step="0.5" name="weight" required>
+    </p>
+
+    <p>
+      <label>Reps</label>
+      <input type="number" name="reps" required>
+    </p>
+
+    <p>
+      <label>Sets</label>
+      <input type="number" name="sets" value="3">
+    </p>
+
+    <button type="submit">Add Lift</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Logged Lifts</h2>
+
+  {% if entries %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Exercise</th>
+          <th>Weight</th>
+          <th>Reps</th>
+          <th>Sets</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entries %}
+          <tr>
+            <td>{{ e.exercise.name }}</td>
+            <td>{{ e.weight }}</td>
+            <td>{{ e.reps }}</td>
+            <td>{{ e.sets }}</td>
+            <td>{{ e.logged_at|date:"M d, Y" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No lifts logged yet.</p>
+  {% endif %}
+</div>
+
+<a class="pill" href="{% url 'dashboard' %}">← Back to Dashboard</a>
+
+{% endblock %}

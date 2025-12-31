@@ -1,51 +1,56 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="grid">
-    <div class="card">
-      <div class="h1">Your Lifts</div>
-      <p class="muted">Keep it consistent. Small upgrades each week.</p>
 
-      <div style="margin:12px 0;">
-        <a class="pill accent" href="{% url 'add_lift' %}">Add / Update a Lift</a>
-      </div>
+<div class="card">
+  <h1>Your Workouts</h1>
+  <p class="muted">Choose a workout or create a new one.</p>
 
-      {% if lifts %}
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Lift</th>
-              <th>Weight</th>
-              <th>Reps</th>
-              <th>Sets</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for lift in lifts %}
-              <tr>
-                <td>{{ lift.name }}</td>
-                <td>{{ lift.weight }} lb</td>
-                <td>{{ lift.reps }}</td>
-                <td>{{ lift.sets }}</td>
-                <td>
-                  <form method="post" action="{% url 'delete_lift' lift.id %}">
-                    {% csrf_token %}
-                    <button type="submit">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-        <p class="muted">No lifts yet. Add your first one.</p>
-      {% endif %}
-    </div>
+  <a class="pill accent" href="{% url 'create_workout' %}">+ Create Workout</a>
 
-    <div class="card">
-      <div class="h1">Coach Tip</div>
-      <p>{{ tip }}</p>
-      <p class="muted">If you can’t progress safely, keep weight the same and tighten form.</p>
-    </div>
-  </div>
+  {% if workouts %}
+    <ul style="margin-top:16px">
+      {% for workout in workouts %}
+        <li style="margin-bottom:10px">
+          <a class="pill" href="{% url 'workout_detail' workout.id %}">
+            {{ workout.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No workouts yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Recent Lifts</h2>
+
+  {% if recent %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Workout</th>
+          <th>Exercise</th>
+          <th>Weight</th>
+          <th>Reps</th>
+          <th>Sets</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in recent %}
+          <tr>
+            <td>{{ e.workout.name }}</td>
+            <td>{{ e.exercise.name }}</td>
+            <td>{{ e.weight }}</td>
+            <td>{{ e.reps }}</td>
+            <td>{{ e.sets }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">No lift history yet.</p>
+  {% endif %}
+</div>
+
 {% endblock %}
