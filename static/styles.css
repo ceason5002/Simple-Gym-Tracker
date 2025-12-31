@@ -1,0 +1,68 @@
+:root{
+  --bg:#0b0b0b;
+  --card:#111111;
+  --text:#f2f2f2;
+  --muted:#b8b8b8;
+  --accent:#686B6D;
+  --border:#202020;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+a{color:var(--text); text-decoration:none}
+.container{max-width:980px; margin:0 auto; padding:24px}
+.nav{
+  display:flex; gap:14px; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  padding:14px 0;
+}
+.brand{font-weight:700; letter-spacing:.3px}
+.pill{
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:transparent;
+}
+.pill.accent{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(104,107,109,.25) inset;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+  margin-top:16px;
+}
+.h1{font-size:36px; margin:10px 0 0}
+.muted{color:var(--muted)}
+.grid{display:grid; grid-template-columns:1fr; gap:12px}
+@media(min-width:900px){ .grid{grid-template-columns:2fr 1fr} }
+
+input, button{
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#0e0e0e;
+  color:var(--text);
+}
+button{
+  cursor:pointer;
+  border-color:var(--accent);
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+}
+.table th, .table td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.msg{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid var(--border)}
