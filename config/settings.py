@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "tracker",
+    "tracker.apps.TrackerConfig",
 ]
 
 MIDDLEWARE = [
@@ -48,10 +49,12 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "tracker.context_processors.theme_vars",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = "config.wsgi.application"
 

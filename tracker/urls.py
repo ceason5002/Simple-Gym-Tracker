@@ -11,4 +11,5 @@ urlpatterns = [
     path("workouts/create/", views.create_workout, name="create_workout"),
     path("workouts/<int:workout_id>/", views.workout_detail, name="workout_detail"),
     path("entries/add/", views.add_entry, name="add_entry"),
+    path("settings/theme/", views.theme_settings, name="theme_settings"),
 ]

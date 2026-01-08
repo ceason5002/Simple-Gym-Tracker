@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="h1">Theme</div>
+  <form method="post">
+    {% csrf_token %}
+    <p class="muted">Choose a color scheme:</p>
+    <select name="theme">
+      {% for k,v in themes.items %}
+        <option value="{{ k }}" {% if k == theme_key %}selected{% endif %}>{{ k }}</option>
+      {% endfor %}
+    </select>
+    <div style="margin-top:12px;">
+      <button type="submit">Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

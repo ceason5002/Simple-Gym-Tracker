@@ -2,6 +2,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+    :root{
+        --bg: {{ theme_vars.bg }};
+        --card: {{ theme_vars.card }};
+        --text: {{ theme_vars.text }};
+        --muted: {{ theme_vars.muted }};
+        --accent: {{ theme_vars.accent }};
+        --border: {{ theme_vars.border }};
+    }
+    </style>
   <title>Simple Gym Tracker</title>
   <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>

@@ -5,8 +5,18 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import Workout, Exercise, LiftEntry
 from .forms import WorkoutForm, LiftEntryForm, SignUpForm
+from .theme import THEMES
 
-
+@login_required
+def theme_settings(request):
+    if request.method == "POST":
+        theme = request.POST.get("theme", "dark_gray")
+        if theme in THEMES:
+            request.user.profile.theme = theme
+            request.user.profile.save()
+        return redirect("theme_settings")
+    return render(request, "theme_settings.html", {"themes": THEMES})
+    
 def home(request):
     return render(request, "home.html")
 
@@ -97,3 +107,13 @@ def add_entry(request):
     )
 
     return redirect("workout_detail", workout_id=workout.id)
+
+@login_required
+def theme_settings(request):
+    if request.method == "POST":
+        theme = request.POST.get("theme", "dark_gray")
+        if theme in THEMES:
+            request.user.profile.theme = theme
+            request.user.profile.save()
+        return redirect("theme_settings")
+    return render(request, "theme_settings.html", {"themes": THEMES})

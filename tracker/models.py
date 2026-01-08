@@ -33,3 +33,10 @@ class LiftEntry(models.Model):
 
     class Meta:
         ordering = ["-logged_at"]
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    theme = models.CharField(max_length=30, default="dark_gray")
+
+    def __str__(self):
+        return self.user.username
