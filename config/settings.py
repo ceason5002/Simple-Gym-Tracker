@@ -2,13 +2,17 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = [".onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [".onrender.com", ".pythonanywhere.com", "localhost", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "https://*.pythonanywhere.com"]
+
+if not DEBUG and SECRET_KEY == "dev-only-change-me":
+    raise RuntimeError("Set DJANGO_SECRET_KEY when DJANGO_DEBUG=0 (see DEPLOY_PYTHONANYWHERE.md).")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
