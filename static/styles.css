@@ -268,3 +268,12 @@ form ul{margin:6px 0 0; padding-left:18px}
   *, *::before, *::after{animation:none !important; transition:none !important}
   .reveal{opacity:1; transform:none}
 }
+
+/* Nav: active page, and fewer links on small phones */
+.pill.is-active{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent) 60%, var(--border))}
+@media(max-width:520px){
+  .nav .hide-sm{display:none}
+  .nav{padding-left:12px}
+  .nav-links{gap:2px}
+  .nav .pill{padding:8px 11px; font-size:13px}
+}

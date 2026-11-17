@@ -33,6 +33,13 @@ echo "DJANGO_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe
 echo "DJANGO_DEBUG=0" >> .env
 ```
 
+Optional but recommended for food search: get a free key at https://api.data.gov/signup/ and add it
+(without it, search uses a shared demo key that only allows a few lookups an hour):
+
+```bash
+echo "USDA_API_KEY=paste-your-key-here" >> .env
+```
+
 Set up the database and static files:
 
 ```bash

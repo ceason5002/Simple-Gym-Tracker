@@ -31,9 +31,10 @@
     </a>
     <div class="nav-links">
       {% if user.is_authenticated %}
-        <a class="pill ghost" href="{% url 'theme_settings' %}">Theme</a>
+        <a class="pill ghost hide-sm" href="{% url 'theme_settings' %}">Theme</a>
         <a class="pill ghost" href="{% url 'logout' %}">Logout</a>
-        <a class="pill" href="{% url 'dashboard' %}">Dashboard</a>
+        <a class="pill{% if request.resolver_match.url_name == 'dashboard' %} is-active{% endif %}" href="{% url 'dashboard' %}">Lifts</a>
+        <a class="pill{% if 'nutrition' in request.resolver_match.url_name %} is-active{% endif %}" href="{% url 'nutrition' %}">NutrientAI</a>
       {% else %}
         <a class="pill ghost" href="{% url 'login' %}">Login</a>
         <a class="pill" href="{% url 'signup' %}">Sign Up</a>

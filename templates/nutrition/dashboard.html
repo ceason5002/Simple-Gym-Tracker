@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}nutri{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'nutrition.css' %}">{% endblock %}
+
+{% block content %}
+<div class="n-wrap">
+  <header class="n-head reveal">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>NutrientAI</span>
+      <div class="n-date">
+        <button class="n-icon" data-shift="-1" aria-label="Previous day">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1 id="day-label">Today</h1>
+        <button class="n-icon" data-shift="1" aria-label="Next day">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m7 4 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="n-head-actions">
+    <button class="btn-shine btn-sm" data-open-sheet>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      Add
+    </button>
+    <a class="pill" href="{% url 'nutrition_settings' %}" aria-label="Goals">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 4h7M13 4h1M2 12h1M7 12h7M11 2v4M5 10v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="hide-xs">Goals</span>
+    </a>
+    </div>
+  </header>
+
+  <div id="profile-nudge" class="n-nudge reveal" hidden>
+    Using default targets. <a href="{% url 'nutrition_settings' %}">Add your stats and goal</a> for personal numbers.
+  </div>
+
+  <!-- Calories (big) -->
+  <button class="ring-card ring-card--hero reveal" data-metric="calories" aria-pressed="false">
+    <div class="ring" style="--size:168px; --stroke:14px; --c:var(--c-cal)">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="42"/><circle class="bar" cx="50" cy="50" r="42"/></svg>
+      <div class="ring-center"><span class="ring-value" data-value>0</span><span class="ring-unit">kcal</span></div>
+    </div>
+    <div class="ring-meta">
+      <span class="ring-title">Calories</span>
+      <span class="ring-mode" data-mode>consumed</span>
+      <span class="ring-of" data-of></span>
+      <span class="ring-hint">Tap to switch</span>
+    </div>
+  </button>
+
+  <!-- Macros -->
+  <div class="macro-row">
+    <button class="ring-card reveal" data-metric="protein" aria-pressed="false">
+      <div class="ring" style="--size:76px; --stroke:9px; --c:var(--c-protein)">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="40"/><circle class="bar" cx="50" cy="50" r="40"/></svg>
+        <div class="ring-center"><span class="ring-value sm" data-value>0</span><span class="ring-unit">g</span></div>
+      </div>
+      <span class="ring-title">Protein</span>
+      <span class="ring-mode" data-mode>consumed</span>
+      <span class="ring-of" data-of></span>
+    </button>
+    <button class="ring-card reveal" data-metric="carbs" aria-pressed="false">
+      <div class="ring" style="--size:76px; --stroke:9px; --c:var(--c-carbs)">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="40"/><circle class="bar" cx="50" cy="50" r="40"/></svg>
+        <div class="ring-center"><span class="ring-value sm" data-value>0</span><span class="ring-unit">g</span></div>
+      </div>
+      <span class="ring-title">Carbs</span>
+      <span class="ring-mode" data-mode>consumed</span>
+      <span class="ring-of" data-of></span>
+    </button>
+    <button class="ring-card reveal" data-metric="fat" aria-pressed="false">
+      <div class="ring" style="--size:76px; --stroke:9px; --c:var(--c-fat)">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="40"/><circle class="bar" cx="50" cy="50" r="40"/></svg>
+        <div class="ring-center"><span class="ring-value sm" data-value>0</span><span class="ring-unit">g</span></div>
+      </div>
+      <span class="ring-title">Fat</span>
+      <span class="ring-mode" data-mode>consumed</span>
+      <span class="ring-of" data-of></span>
+    </button>
+  </div>
+
+  <!-- Water -->
+  <div class="water-card reveal">
+    <button class="ring-card ring-card--flat" data-metric="water" aria-pressed="false">
+      <div class="ring" style="--size:96px; --stroke:10px; --c:var(--c-water)">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="41"/><circle class="bar" cx="50" cy="50" r="41"/></svg>
+        <div class="ring-center"><span class="ring-value sm" data-value>0</span><span class="ring-unit">oz</span></div>
+      </div>
+      <div class="ring-meta">
+        <span class="ring-title">Water</span>
+        <span class="ring-mode" data-mode>consumed</span>
+        <span class="ring-of" data-of></span>
+      </div>
+    </button>
+    <div class="water-actions">
+      <button class="chip" data-water="8">+8 oz</button>
+      <button class="chip" data-water="16">+16 oz</button>
+      <button class="chip" data-water="custom">Custom</button>
+      <button class="chip chip--ghost" data-water-undo aria-label="Undo last water">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 3 2 6l3 3M2.5 6H10a4 4 0 0 1 0 8H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Undo
+      </button>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <section class="log reveal" aria-labelledby="log-title">
+    <div class="log-head">
+      <h2 id="log-title">Food log</h2>
+      <button class="btn-shine btn-sm" data-open-sheet>+ Add food</button>
+    </div>
+    <div id="log-body"></div>
+  </section>
+</div>
+
+<button class="fab" data-open-sheet aria-label="Add food">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+</button>
+
+<!-- Add-food sheet -->
+<dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+  <div class="sheet-panel">
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <div class="sheet-top">
+      <h2 id="sheet-title">Add food</h2>
+      <button class="n-icon" data-close-sheet aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m4 4 10 10M14 4 4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Picker views -->
+    <div data-view="pick">
+      <div class="tabs" role="tablist">
+        <span class="tab-ind" aria-hidden="true"></span>
+        <button role="tab" class="tab" data-tab="search" aria-selected="true">Search</button>
+        <button role="tab" class="tab" data-tab="scan" aria-selected="false">Scan</button>
+        <button role="tab" class="tab" data-tab="saved" aria-selected="false">Saved</button>
+        <button role="tab" class="tab" data-tab="manual" aria-selected="false">Manual</button>
+      </div>
+
+      <div class="tab-panel" data-panel="search">
+        <label class="search">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="m12.5 12.5 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input id="search-input" type="search" placeholder="Search foods, e.g. greek yogurt" autocomplete="off" aria-label="Search foods">
+        </label>
+        <div id="search-results" class="results" aria-live="polite"></div>
+        <p class="src-note">Food data: USDA FoodData Central and Open Food Facts (ODbL).</p>
+      </div>
+
+      <div class="tab-panel" data-panel="scan" hidden>
+        <div class="scanner">
+          <video id="scan-video" playsinline muted></video>
+          <div class="scan-frame" aria-hidden="true"><span></span></div>
+          <div class="scan-idle" id="scan-idle">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M4 12V6a2 2 0 0 1 2-2h6M28 4h6a2 2 0 0 1 2 2v6M36 28v6a2 2 0 0 1-2 2h-6M12 36H6a2 2 0 0 1-2-2v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M11 13v14M15 13v14M19 13v14M24 13v14M28 13v14" stroke="currentColor" stroke-width="1.6"/></svg>
+            <button class="btn-shine" id="scan-start">Start camera</button>
+          </div>
+        </div>
+        <p class="muted scan-status" id="scan-status" aria-live="polite">Point your camera at a barcode.</p>
+        <form class="barcode-form" id="barcode-form">
+          <input id="barcode-input" inputmode="numeric" pattern="[0-9]{6,14}" placeholder="Or type the barcode number" aria-label="Barcode number">
+          <button type="submit" class="pill">Look up</button>
+        </form>
+      </div>
+
+      <div class="tab-panel" data-panel="saved" hidden>
+        <div id="saved-list" class="results"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="manual" hidden>
+        <form id="manual-form" class="manual">
+          <p><label for="m-name">Food name</label><input id="m-name" required maxlength="120" placeholder="e.g. Homemade chili"></p>
+          <p><label for="m-serving">Serving</label><input id="m-serving" maxlength="80" value="1 serving"></p>
+          <div class="grid4">
+            <p><label for="m-cal">Calories</label><input id="m-cal" type="number" min="0" step="1" required></p>
+            <p><label for="m-p">Protein g</label><input id="m-p" type="number" min="0" step="0.1" value="0"></p>
+            <p><label for="m-c">Carbs g</label><input id="m-c" type="number" min="0" step="0.1" value="0"></p>
+            <p><label for="m-f">Fat g</label><input id="m-f" type="number" min="0" step="0.1" value="0"></p>
+          </div>
+          <button type="submit">Continue</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Detail view -->
+    <div data-view="detail" hidden>
+      <button class="back-link" data-back>
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="detail-head">
+        <div>
+          <h3 id="d-name"></h3>
+          <p class="muted" id="d-sub"></p>
+        </div>
+        <button class="save-btn" id="d-save" aria-pressed="false" aria-label="Save to my foods">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="m10 2.5 2.3 4.8 5.2.7-3.8 3.6.9 5.2L10 14.3l-4.6 2.5.9-5.2L2.5 8l5.2-.7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="amount">
+        <label for="d-amount">Amount</label>
+        <div class="amount-row">
+          <div class="stepper">
+            <button type="button" data-step="-1" aria-label="Less">&minus;</button>
+            <input id="d-amount" type="number" min="0.01" step="0.25" value="1" inputmode="decimal">
+            <button type="button" data-step="1" aria-label="More">+</button>
+          </div>
+          <div class="seg" id="d-unit" role="radiogroup" aria-label="Unit">
+            <button type="button" role="radio" data-unit="serv" aria-checked="true">servings</button>
+            <button type="button" role="radio" data-unit="g" aria-checked="false">g</button>
+          </div>
+        </div>
+        <p class="muted small" id="d-serving"></p>
+      </div>
+
+      <div class="macro-preview">
+        <div><b id="d-cal">0</b><span>kcal</span></div>
+        <div><b id="d-p">0</b><span>protein</span></div>
+        <div><b id="d-c">0</b><span>carbs</span></div>
+        <div><b id="d-f">0</b><span>fat</span></div>
+      </div>
+
+      <label for="d-meal">Meal</label>
+      <select id="d-meal">
+        {% for value, label in meals %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+
+      <button class="d-add" id="d-add">Add to log</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+{{ day|json_script:"day-data" }}
+{{ saved|json_script:"saved-data" }}
+<script>
+  window.NUTRI = {
+    api: {
+      day: "{% url 'nutrition_api_day' %}",
+      search: "{% url 'nutrition_api_search' %}",
+      barcode: "{% url 'nutrition_api_barcode' '0000000' %}".replace("0000000/", ""),
+      log: "{% url 'nutrition_api_log_add' %}",
+      saved: "{% url 'nutrition_api_saved_add' %}",
+      water: "{% url 'nutrition_api_water_add' %}",
+      waterUndo: "{% url 'nutrition_api_water_undo' %}",
+      page: "{% url 'nutrition' %}",
+    },
+    zxing: "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js",
+  };
+</script>
+<script src="{% static 'nutrition.js' %}" defer></script>
+{% endblock %}

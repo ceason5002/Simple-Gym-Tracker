@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}nutri{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'nutrition.css' %}"><link rel="stylesheet" href="{% static 'nutrition-settings.css' %}">{% endblock %}
+
+{% block content %}
+<div class="n-wrap">
+  <a class="back-link reveal" href="{% url 'nutrition' %}" style="margin-top:24px">
+    <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    NutrientAI
+  </a>
+  <span class="eyebrow reveal" style="display:flex"><span class="dot"></span>Settings</span>
+  <h1 class="reveal">Your goal</h1>
+
+  <form method="post" class="goals-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="msg">{{ form.non_field_errors }}</div>{% endif %}
+
+    <fieldset class="goal-pick reveal">
+      <legend class="sr-only">Goal</legend>
+      {% for radio in form.goal %}
+        <label class="goal-opt">
+          {{ radio.tag }}
+          <span class="goal-body">
+            <span class="goal-icon" aria-hidden="true">
+              {% if radio.data.value == "lose" %}<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7l6 6 4-4 6 6M20 10v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {% elif radio.data.value == "gain" %}<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 17l6-6 4 4 6-6M20 14V9h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              {% else %}<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}
+            </span>
+            <span class="goal-name">{{ radio.choice_label }}</span>
+            <span class="goal-desc muted">
+              {% if radio.data.value == "lose" %}About 500 kcal below maintenance, roughly 1 lb a week. Higher protein.
+              {% elif radio.data.value == "gain" %}About 300 kcal above maintenance for a lean gain.
+              {% else %}Eat at maintenance to hold your weight steady.{% endif %}
+            </span>
+          </span>
+        </label>
+      {% endfor %}
+    </fieldset>
+
+    <div class="card reveal">
+      <h2>About you</h2>
+      <p class="muted small" style="margin-top:-6px">Used to estimate your maintenance calories (Mifflin-St Jeor).</p>
+      <div class="field">
+        <span class="label">Sex</span>
+        <div class="seg seg-radio">
+          {% for radio in form.sex %}<label>{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>{% endfor %}
+        </div>
+      </div>
+      <div class="grid3">
+        <p><label for="{{ form.age.id_for_label }}">Age</label>{{ form.age }}{{ form.age.errors }}</p>
+        <p><label for="{{ form.height_in.id_for_label }}">Height (in)</label>{{ form.height_in }}{{ form.height_in.errors }}</p>
+        <p><label for="{{ form.weight_lb.id_for_label }}">Weight (lb)</label>{{ form.weight_lb }}{{ form.weight_lb.errors }}</p>
+      </div>
+      <p><label for="{{ form.activity.id_for_label }}">Activity level</label>{{ form.activity }}</p>
+    </div>
+
+    <div class="card reveal targets-card">
+      <div class="card-head">
+        <h2>Daily targets</h2>
+        {% if targets.maintenance %}<span class="badge">Maintenance ≈ {{ targets.maintenance }} kcal</span>{% endif %}
+      </div>
+      <div class="targets">
+        <div><b>{{ targets.calories }}</b><span>kcal</span></div>
+        <div><b>{{ targets.protein }}g</b><span>protein</span></div>
+        <div><b>{{ targets.carbs }}g</b><span>carbs</span></div>
+        <div><b>{{ targets.fat }}g</b><span>fat</span></div>
+        <div><b>{{ targets.water_oz }}</b><span>oz water</span></div>
+      </div>
+      {% if not targets.complete %}<p class="muted small">These are defaults. Fill in the section above to personalise them.</p>{% endif %}
+
+      <details class="overrides" {% if form.instance.calorie_override or form.instance.protein_override or form.instance.carbs_override or form.instance.fat_override or form.instance.water_override_oz %}open{% endif %}>
+        <summary>Set my own numbers</summary>
+        <p class="muted small">Leave a box empty to use the calculated value. Carbs fill the remaining calories unless you set them.</p>
+        <div class="grid5">
+          {% for f in form %}{% if "override" in f.name %}
+            <p><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{{ f.errors }}</p>
+          {% endif %}{% endfor %}
+        </div>
+      </details>
+    </div>
+
+    <button type="submit" class="reveal">Save goals</button>
+  </form>
+
+  <p class="muted small" style="text-align:center; margin-top:18px">Looking for colour schemes? <a href="{% url 'theme_settings' %}" style="text-decoration:underline">Theme settings</a></p>
+</div>
+{% endblock %}

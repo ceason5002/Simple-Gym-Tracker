@@ -1,0 +1,325 @@
+/* NutrientAI. Theme tokens (--bg, --card, --text, --muted, --accent, --border) come from base.html. */
+:root{
+  --c-cal: color-mix(in srgb, var(--accent) 45%, var(--text) 55%);
+  --c-protein: #f0606e;
+  --c-carbs: #f2b33d;
+  --c-fat: #4d9cf0;
+  --c-water: #2fb8d8;
+  --c-over: #ef4444;
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+}
+body.nutri .bg-fx .blob{opacity:.18}
+
+.n-wrap{max-width:720px; margin:0 auto; padding-bottom:96px}
+
+/* ---------- header ---------- */
+.n-head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-top:28px}
+.n-head-actions{display:flex; gap:8px; align-items:center}
+.n-head-actions .btn-sm{padding:9px 14px}
+.n-date{display:flex; align-items:center; gap:6px; margin-top:6px}
+.n-date h1{margin:0; min-width:5.5ch; text-align:center; font-size:clamp(26px, 6vw, 34px)}
+.n-icon{
+  width:36px; height:36px; padding:0; display:inline-grid; place-items:center;
+  border-radius:50%; border:1px solid transparent; background:transparent; color:var(--text);
+  animation:none; overflow:visible; font-size:inherit;
+}
+.n-icon::after{display:none}
+.n-icon:hover{background:var(--accent-soft); border-color:var(--border); transform:none; box-shadow:none}
+.n-icon:disabled{opacity:.3; cursor:default; background:transparent}
+
+.n-nudge{
+  margin-top:14px; padding:12px 16px; border-radius:14px; font-size:14px;
+  border:1px dashed var(--border); color:var(--muted);
+}
+.n-nudge a{color:var(--text); text-decoration:underline; text-underline-offset:3px}
+
+/* ---------- ring cards ---------- */
+.ring-card{
+  /* reset the global animated button styles */
+  all:unset; box-sizing:border-box; cursor:pointer;
+  position:relative; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:18px 10px 16px; border-radius:var(--radius);
+  background:var(--card); border:1px solid var(--border);
+  transition:transform .25s var(--ease), border-color .25s var(--ease), box-shadow .3s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.ring-card:hover{transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 50%, var(--border)); box-shadow:0 14px 32px -18px var(--accent)}
+.ring-card:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.ring-card:active{transform:scale(.98)}
+.ring-card.flip .ring-center{animation:flip .45s var(--ease)}
+@keyframes flip{0%{transform:rotateX(0)} 50%{transform:rotateX(90deg); opacity:.2} 100%{transform:rotateX(0)}}
+
+.ring-card--hero{
+  margin-top:18px; width:100%;
+  flex-direction:row; justify-content:center; gap:clamp(18px, 6vw, 48px);
+  padding:26px 20px;
+  background:
+    radial-gradient(420px circle at 30% 0%, color-mix(in srgb, var(--c-cal) 14%, transparent), transparent 70%),
+    var(--card);
+}
+.ring-card--flat{flex-direction:row; gap:18px; padding:0; border:0; background:transparent}
+.ring-card--flat:hover{transform:none; box-shadow:none}
+
+.ring{position:relative; width:var(--size); height:var(--size); flex:none}
+.ring svg{width:100%; height:100%; transform:rotate(-90deg); overflow:visible}
+.ring circle{fill:none; stroke-width:calc(var(--stroke) * 100 / var(--size))}
+.ring .track{stroke:color-mix(in srgb, var(--text) 9%, transparent)}
+.ring .bar{
+  stroke:var(--c); stroke-linecap:round;
+  transition:stroke-dashoffset 1s var(--ease), stroke .3s;
+  filter:drop-shadow(0 0 6px color-mix(in srgb, var(--c) 45%, transparent));
+}
+.is-over .ring .bar{stroke:var(--c-over); filter:drop-shadow(0 0 6px color-mix(in srgb, var(--c-over) 50%, transparent))}
+.ring-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1}
+.ring-value{font-size:38px; font-weight:700; letter-spacing:-.03em; font-variant-numeric:tabular-nums}
+.ring-value.sm{font-size:19px; letter-spacing:-.02em}
+.ring-unit{font-size:11px; color:var(--muted); margin-top:3px; letter-spacing:.04em}
+
+.ring-meta{display:flex; flex-direction:column; gap:4px; align-items:flex-start; justify-content:center}
+.ring-title{font-weight:600; font-size:15px}
+.ring-card--hero .ring-title{font-size:22px; letter-spacing:-.02em}
+.ring-mode{
+  font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:color-mix(in srgb, var(--c, var(--text)) 70%, var(--text));
+}
+.ring-card[data-metric="calories"] .ring-mode{color:var(--c-cal)}
+.ring-card[data-metric="protein"] .ring-mode{color:var(--c-protein)}
+.ring-card[data-metric="carbs"] .ring-mode{color:var(--c-carbs)}
+.ring-card[data-metric="fat"] .ring-mode{color:var(--c-fat)}
+.ring-card[data-metric="water"] .ring-mode{color:var(--c-water)}
+.is-over .ring-mode{color:var(--c-over) !important}
+.ring-of{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+.ring-hint{font-size:12px; color:color-mix(in srgb, var(--muted) 70%, transparent); margin-top:6px}
+
+.macro-row{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:12px}
+.macro-row .ring-card{text-align:center}
+
+/* ---------- water ---------- */
+.water-card{
+  margin-top:12px; padding:18px; border-radius:var(--radius);
+  background:
+    radial-gradient(360px circle at 0% 100%, color-mix(in srgb, var(--c-water) 12%, transparent), transparent 70%),
+    var(--card);
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.water-actions{display:flex; gap:8px; flex-wrap:wrap}
+.chip{
+  all:unset; box-sizing:border-box; cursor:pointer; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 14px; border-radius:999px; font-size:14px; font-weight:600;
+  border:1px solid color-mix(in srgb, var(--c-water) 45%, var(--border));
+  background:color-mix(in srgb, var(--c-water) 10%, transparent);
+  transition:transform .2s var(--ease-spring), background .2s;
+}
+.chip:hover{background:color-mix(in srgb, var(--c-water) 20%, transparent)}
+.chip:active{transform:scale(.94)}
+.chip:focus-visible{outline:2px solid var(--c-water); outline-offset:2px}
+.chip--ghost{border-color:var(--border); background:transparent; color:var(--muted)}
+
+/* ---------- log ---------- */
+.log{margin-top:26px}
+.log-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px}
+.log-head h2{margin:0}
+.btn-sm{padding:9px 16px; font-size:14px}
+.meal{margin-top:14px; border:1px solid var(--border); border-radius:var(--radius); background:var(--card); overflow:hidden}
+.meal-head{display:flex; justify-content:space-between; padding:12px 16px; font-weight:600; font-size:14px; border-bottom:1px solid var(--border)}
+.entry{display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:12px 8px 12px 16px; animation:rise .45s var(--ease) both}
+.entry + .entry{border-top:1px solid color-mix(in srgb, var(--border) 60%, transparent)}
+.entry-main{display:flex; flex-direction:column; min-width:0}
+.entry-name{font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.entry-sub{font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.entry-macros{display:flex; flex-direction:column; align-items:flex-end; font-variant-numeric:tabular-nums}
+.entry-macros span{font-size:11px; white-space:nowrap}
+.entry-del{color:var(--muted)}
+
+/* ---------- FAB ---------- */
+.fab{
+  position:fixed; right:max(20px, env(safe-area-inset-right)); bottom:max(22px, env(safe-area-inset-bottom));
+  width:60px; height:60px; padding:0; border-radius:50%; z-index:20;
+  background:var(--text); color:var(--bg); border:0; animation:none;
+  box-shadow:0 12px 30px -10px rgba(0,0,0,.5);
+  transition:transform .3s var(--ease-spring), opacity .25s, visibility .25s;
+}
+body:not(.fab-on) .fab{opacity:0; visibility:hidden; transform:scale(.6)}
+.fab::after{display:none}
+.fab:hover{transform:scale(1.06) rotate(90deg); box-shadow:0 14px 34px -10px rgba(0,0,0,.55)}
+@media (min-width:900px){ .fab{display:none} }
+
+/* ---------- sheet (dialog) ---------- */
+.sheet{
+  border:0; padding:0; margin:0; max-width:none; max-height:none; width:100%; height:100%;
+  background:transparent; color:var(--text);
+}
+.sheet::backdrop{background:rgba(0,0,0,.45); backdrop-filter:blur(4px); animation:fade .25s ease}
+.sheet[open]{display:flex; align-items:flex-end; justify-content:center}
+.sheet-panel{
+  width:min(640px, 100%); max-height:min(88vh, 760px); overflow:auto; overscroll-behavior:contain;
+  background:var(--card); border:1px solid var(--border); border-bottom:0;
+  border-radius:24px 24px 0 0; padding:10px 20px max(24px, env(safe-area-inset-bottom));
+  box-shadow:0 -20px 60px -20px rgba(0,0,0,.5);
+  animation:sheet-up .38s var(--ease) both;
+}
+@media (min-width:700px){
+  .sheet[open]{align-items:center}
+  .sheet-panel{border-radius:24px; border-bottom:1px solid var(--border)}
+}
+.sheet.is-closing .sheet-panel{animation:sheet-down .22s ease-in both}
+.sheet.is-closing::backdrop{opacity:0; transition:opacity .2s}
+@keyframes sheet-up{from{transform:translateY(40px); opacity:0}}
+@keyframes sheet-down{to{transform:translateY(40px); opacity:0}}
+@keyframes fade{from{opacity:0}}
+.sheet-grip{width:40px; height:4px; border-radius:4px; background:var(--border); margin:2px auto 8px}
+.sheet-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.sheet-top h2{margin:0}
+
+/* tabs with sliding indicator */
+.tabs{
+  position:relative; display:grid; grid-template-columns:repeat(4, 1fr);
+  padding:4px; border-radius:14px; background:var(--input-bg); border:1px solid var(--border); margin-bottom:14px;
+}
+.tab{
+  all:unset; box-sizing:border-box; cursor:pointer; position:relative; z-index:1;
+  text-align:center; padding:9px 4px; font-size:14px; font-weight:600; color:var(--muted);
+  border-radius:10px; transition:color .2s;
+}
+.tab[aria-selected="true"]{color:var(--text)}
+.tab:focus-visible{outline:2px solid var(--accent)}
+.tab-ind{
+  position:absolute; top:4px; left:0; bottom:4px; border-radius:10px;
+  background:var(--card); border:1px solid var(--border);
+  box-shadow:0 2px 10px -4px rgba(0,0,0,.25);
+  transition:transform .35s var(--ease), width .35s var(--ease);
+}
+
+.search{
+  display:flex; align-items:center; gap:10px; padding:0 14px;
+  border-radius:12px; border:1px solid var(--border); background:var(--input-bg); color:var(--muted);
+  transition:border-color .2s, box-shadow .25s;
+}
+.search:focus-within{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+.search input{border:0 !important; box-shadow:none !important; background:transparent !important; padding:13px 0}
+
+.results{display:flex; flex-direction:column; gap:6px; margin-top:12px}
+.results-label{font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:8px 2px 0}
+.result{
+  all:unset; box-sizing:border-box; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--input-bg);
+  transition:border-color .2s, transform .2s var(--ease); animation:rise .35s var(--ease) both;
+}
+.result:hover{border-color:color-mix(in srgb, var(--accent) 60%, var(--border)); transform:translateX(2px)}
+.result:focus-visible{outline:2px solid var(--accent)}
+.result-main{display:flex; flex-direction:column; min-width:0}
+.result-name{font-weight:500; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+.result-sub{font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.result-kcal{display:flex; flex-direction:column; align-items:flex-end; font-variant-numeric:tabular-nums; flex:none}
+.result-kcal span{font-size:11px}
+.skeleton{height:58px; border-radius:12px; background:linear-gradient(90deg, var(--input-bg) 25%, color-mix(in srgb, var(--text) 6%, var(--input-bg)) 50%, var(--input-bg) 75%); background-size:200% 100%; animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.src-note{font-size:11px; color:var(--muted); margin:14px 2px 0}
+
+/* scanner */
+.scanner{
+  position:relative; aspect-ratio:4/3; border-radius:18px; overflow:hidden;
+  background:#000; border:1px solid var(--border);
+}
+.scanner video{width:100%; height:100%; object-fit:cover; display:block}
+.scan-frame{position:absolute; inset:22% 12%; border-radius:14px; box-shadow:0 0 0 999px rgba(0,0,0,.35); opacity:0; transition:opacity .3s}
+.scan-frame::before{content:""; position:absolute; inset:0; border:2px solid rgba(255,255,255,.85); border-radius:14px}
+.scan-frame span{position:absolute; left:6%; right:6%; height:2px; top:50%; background:#ff4d4d; box-shadow:0 0 12px #ff4d4d; animation:scanline 1.8s ease-in-out infinite}
+@keyframes scanline{0%,100%{transform:translateY(-36px)} 50%{transform:translateY(36px)}}
+.sheet.is-scanning .scan-frame{opacity:1}
+.scan-idle{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:rgba(255,255,255,.7); background:radial-gradient(circle at 50% 40%, #1c1c1f, #050505)}
+.scan-idle[hidden]{display:none}
+.scan-status{font-size:14px; margin:12px 2px}
+.barcode-form{display:flex; gap:8px}
+.barcode-form input{flex:1}
+.barcode-form .pill{cursor:pointer; flex:none}
+
+.manual .grid4{display:grid; grid-template-columns:repeat(2, 1fr); gap:0 12px}
+@media (min-width:520px){ .manual .grid4{grid-template-columns:repeat(4, 1fr)} }
+
+/* detail */
+.back-link{all:unset; cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-size:14px; color:var(--muted); margin-bottom:10px}
+.back-link:hover{color:var(--text)}
+.detail-head{display:flex; justify-content:space-between; gap:12px; align-items:flex-start}
+.detail-head h3{margin:0; font-size:20px; letter-spacing:-.015em}
+.detail-head p{margin:4px 0 0; font-size:13px}
+.save-btn{
+  all:unset; cursor:pointer; flex:none; width:42px; height:42px; display:grid; place-items:center;
+  border-radius:50%; border:1px solid var(--border); color:var(--muted);
+  transition:transform .3s var(--ease-spring), color .2s, background .2s;
+}
+.save-btn svg path{fill:transparent; transition:fill .2s}
+.save-btn[aria-pressed="true"]{color:var(--c-carbs); border-color:color-mix(in srgb, var(--c-carbs) 50%, var(--border)); background:color-mix(in srgb, var(--c-carbs) 12%, transparent)}
+.save-btn[aria-pressed="true"] svg path{fill:currentColor}
+.save-btn:active{transform:scale(.85)}
+.save-btn:disabled{cursor:default}
+.save-btn:focus-visible{outline:2px solid var(--accent)}
+
+.amount{margin-top:18px}
+.amount-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.stepper{display:flex; align-items:center; border:1px solid var(--border); border-radius:12px; background:var(--input-bg); overflow:hidden}
+.stepper button{all:unset; cursor:pointer; width:44px; height:44px; text-align:center; font-size:20px; color:var(--text)}
+.stepper button:hover{background:var(--accent-soft)}
+.stepper input{width:80px; text-align:center; border:0 !important; border-radius:0; box-shadow:none !important; background:transparent !important; font-weight:600; -moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+.seg{display:flex; padding:3px; border-radius:12px; background:var(--input-bg); border:1px solid var(--border)}
+.seg[hidden]{display:none}
+.seg button{all:unset; cursor:pointer; padding:8px 14px; border-radius:9px; font-size:14px; font-weight:600; color:var(--muted); transition:background .2s, color .2s}
+.seg button[aria-checked="true"]{background:var(--card); color:var(--text); box-shadow:0 1px 6px -2px rgba(0,0,0,.25)}
+.small{font-size:13px; margin:8px 2px 0}
+
+.macro-preview{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin:18px 0;
+  padding:14px; border-radius:14px; background:var(--input-bg); border:1px solid var(--border); text-align:center;
+}
+.macro-preview b{display:block; font-size:20px; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.macro-preview span{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.macro-preview div:nth-child(1) b{color:var(--c-cal)}
+.macro-preview div:nth-child(2) b{color:var(--c-protein)}
+.macro-preview div:nth-child(3) b{color:var(--c-carbs)}
+.macro-preview div:nth-child(4) b{color:var(--c-fat)}
+.d-add{width:100%; margin-top:16px}
+
+/* toast */
+.toast{
+  position:fixed; left:50%; bottom:max(96px, calc(env(safe-area-inset-bottom) + 90px)); z-index:100;
+  transform:translate(-50%, 20px); opacity:0; pointer-events:none;
+  padding:11px 18px; border-radius:999px; font-size:14px; font-weight:500;
+  background:var(--text); color:var(--bg); box-shadow:0 10px 30px -10px rgba(0,0,0,.4);
+  transition:opacity .25s, transform .35s var(--ease-spring);
+}
+.toast.is-on{opacity:1; transform:translate(-50%, 0)}
+.toast.is-error{background:var(--c-over); color:#fff}
+
+/* ---------- phones ---------- */
+@media (max-width:560px){
+  .ring-card--hero{flex-direction:column; gap:12px}
+  .ring-card--hero .ring-meta{align-items:center}
+  .macro-row{gap:8px}
+  .macro-row .ring-card{padding:14px 4px 12px}
+  .macro-row .ring{--size:68px !important}
+  .ring-of{font-size:11px; text-align:center}
+  .water-card{flex-direction:column; align-items:stretch}
+  .water-actions{justify-content:space-between}
+  .water-actions{flex-wrap:nowrap; gap:6px}
+  .water-actions .chip{flex:1; justify-content:center; padding:10px 6px; white-space:nowrap; font-size:13px}
+  .hide-xs{display:none}
+  .n-date{gap:2px}
+  .n-date h1{min-width:0}
+  .n-date .n-icon{width:32px; height:32px}
+  .n-head-actions .pill{padding:9px 11px}
+  .log-head .btn-sm{display:none}
+  .entry-macros span{display:none}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .ring .bar, .tab-ind, .sheet-panel, .entry, .result{transition:none; animation:none}
+}
+
+/* These elements reset the global button styles; also drop the global shine stripe,
+   which would otherwise show outside them once overflow clipping is reset */
+.ring-card::after, .chip::after, .tab::after, .result::after, .seg button::after,
+.stepper button::after, .save-btn::after, .back-link::after, .n-icon::after, .fab::after{display:none}

@@ -1,0 +1,52 @@
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.goals-form{margin-top:8px}
+.goals-form .card h2{margin-bottom:12px}
+
+.goal-pick{border:0; padding:0; margin:12px 0 0; display:grid; grid-template-columns:repeat(3, 1fr); gap:12px}
+.goal-opt{position:relative; cursor:pointer; margin:0}
+.goal-opt input{position:absolute; opacity:0; pointer-events:none}
+.goal-body{
+  height:100%; display:flex; flex-direction:column; gap:6px; padding:16px;
+  border-radius:var(--radius); border:2px solid var(--border); background:var(--card);
+  transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .3s var(--ease);
+}
+.goal-opt:hover .goal-body{transform:translateY(-2px)}
+.goal-opt input:checked + .goal-body{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft), 0 14px 30px -18px var(--accent)}
+.goal-opt input:focus-visible + .goal-body{outline:2px solid var(--accent); outline-offset:3px}
+.goal-icon{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:var(--accent-soft); border:1px solid var(--border)}
+.goal-name{font-weight:600; font-size:16px}
+.goal-desc{font-size:13px; line-height:1.45}
+
+.field{margin:14px 0}
+.field .label{display:block; font-size:13px; font-weight:500; color:var(--muted); margin-bottom:6px}
+.seg-radio{display:inline-flex}
+.seg-radio label{margin:0; cursor:pointer}
+.seg-radio input{position:absolute; opacity:0; pointer-events:none}
+.seg-radio span{display:block; padding:8px 18px; border-radius:9px; font-size:14px; font-weight:600; color:var(--muted); transition:background .2s, color .2s}
+.seg-radio input:checked + span{background:var(--card); color:var(--text); box-shadow:0 1px 6px -2px rgba(0,0,0,.25)}
+.seg-radio input:focus-visible + span{outline:2px solid var(--accent)}
+
+.grid3{display:grid; grid-template-columns:repeat(3, 1fr); gap:0 12px}
+.grid5{display:grid; grid-template-columns:repeat(5, 1fr); gap:0 10px}
+
+.targets{display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; text-align:center; padding:14px; border-radius:14px; background:var(--input-bg); border:1px solid var(--border)}
+.targets b{display:block; font-size:22px; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.targets span{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+.targets div:nth-child(1) b{color:var(--c-cal)}
+.targets div:nth-child(2) b{color:var(--c-protein)}
+.targets div:nth-child(3) b{color:var(--c-carbs)}
+.targets div:nth-child(4) b{color:var(--c-fat)}
+.targets div:nth-child(5) b{color:var(--c-water)}
+
+.overrides{margin-top:16px}
+.overrides summary{cursor:pointer; font-weight:600; font-size:14px}
+.goals-form > button{margin-top:18px}
+
+@media (max-width:640px){
+  .goal-pick{grid-template-columns:1fr}
+  .goal-body{flex-direction:row; flex-wrap:wrap; align-items:center; column-gap:12px}
+  .goal-desc{flex-basis:100%}
+  .grid5{grid-template-columns:repeat(2, 1fr)}
+  .targets{grid-template-columns:repeat(3, 1fr); row-gap:14px}
+}
+@media (max-width:420px){ .grid3{grid-template-columns:1fr 1fr} }
