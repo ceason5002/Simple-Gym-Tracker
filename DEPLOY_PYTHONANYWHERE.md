@@ -91,8 +91,8 @@ Then click **Reload** on the Web tab.
 
 ## Free-plan limits to know
 
-- PythonAnywhere asks free users to log in periodically and click **Run until 3 months from
-  today** on the Web tab, or the site is switched off. They email a reminder first.
+- Free sites must be renewed: log in at least once a month and click **Run until 1 month from
+  today** on the Web tab, or the site is switched off. They email a reminder a week before.
 - Outbound internet access from free accounts is limited to an allowlist. This app does not
   call any outside services, so it is not affected.
 - Disk space and CPU time are limited, which is plenty for this app.
