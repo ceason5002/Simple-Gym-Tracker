@@ -14,6 +14,17 @@ CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "https://*.pythonanywhere.com"
 if not DEBUG and SECRET_KEY == "dev-only-change-me":
     raise RuntimeError("Set DJANGO_SECRET_KEY when DJANGO_DEBUG=0 (see DEPLOY_PYTHONANYWHERE.md).")
 
+if not DEBUG:
+    # Production is served over HTTPS behind the host's proxy (PythonAnywhere / Render)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    # http -> https redirect is done by the host (PythonAnywhere "Force HTTPS"), not Django,
+    # so a missing proxy header can never cause a redirect loop.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # HSTS: start short (1 hour). Once the site has run fine over HTTPS for a while,
+    # raise it, e.g. to 31536000 (one year), via the env var.
+    SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "3600"))
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
