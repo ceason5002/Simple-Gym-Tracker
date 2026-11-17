@@ -157,6 +157,8 @@ body.landing ::selection{background:color-mix(in srgb, var(--accent) 35%, transp
   .hero3d{min-height:auto}
   .hero3d__grid{grid-template-columns:1fr; gap:0; padding-top:0}
   .hero3d__stage{min-height:40vh; min-height:40svh; order:-1}
+  /* Only render where the dumbbell is (top of the hero), not behind the copy */
+  .hero3d__canvas{inset:0 0 auto 0; height:40vh; height:40svh}
   .drag-hint{display:none}
   .ghost-word{top:3%; transform:none; right:auto; left:50%; translate:-50% 0; font-size:52vw}
   .steps{grid-template-columns:1fr}

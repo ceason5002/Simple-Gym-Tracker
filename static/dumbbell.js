@@ -184,7 +184,9 @@ function dumbbellHero(root) {
   function layout() {
     const W = canvas.clientWidth, H = canvas.clientHeight;
     if (!W || !H) return;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const narrow = window.innerWidth < 860;
+    // Phones: cap pixel density lower; the canvas is small and fill-rate is the bottleneck
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, narrow ? 1.5 : 2));
     renderer.setSize(W, H, false);
     const c = canvas.getBoundingClientRect();
     let s = stage.getBoundingClientRect();
@@ -192,7 +194,8 @@ function dumbbellHero(root) {
     const sx = s.left - c.left + s.width / 2, sy = s.top - c.top + s.height / 2;
     camera.aspect = W / H;
     camera.setViewOffset(W, H, W / 2 - sx, H / 2 - sy, W, H);
-    const fitPx = 1.08 * Math.min(s.width, s.height);
+    // On a near-square phone stage the bar's ends would swing past the screen edge when side-on
+    const fitPx = (narrow ? 0.86 : 1.08) * Math.min(s.width, s.height);
     baseDist = H / (fitPx * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
     camera.position.set(0, 0, baseDist);
     camera.updateProjectionMatrix();
@@ -228,15 +231,27 @@ function dumbbellHero(root) {
   function wake() { if (!raf && visible && !dead) { last = performance.now(); raf = requestAnimationFrame(tick); } }
 
   // Drag to spin
-  let lastX = 0, lastY = 0, lastT = 0;
-  stage.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    stage.setPointerCapture(e.pointerId);
-    dragging = true; vx = vy = 0;
+  // Touch only grabs the dumbbell once the finger clearly moves sideways, so a vertical
+  // page scroll that starts on it doesn't freeze the spin and snap it back.
+  let lastX = 0, lastY = 0, lastT = 0, pending = null;
+  const grab = (e) => {
+    dragging = true; vx = vy = 0; pending = null;
     lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp;
     wake();
+  };
+  stage.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.pointerType === "touch") { pending = { id: e.pointerId, x: e.clientX, y: e.clientY }; return; }
+    stage.setPointerCapture(e.pointerId);
+    grab(e);
   });
   stage.addEventListener("pointermove", (e) => {
+    if (pending && e.pointerId === pending.id) {
+      const mx = Math.abs(e.clientX - pending.x), my = Math.abs(e.clientY - pending.y);
+      if (mx > 8 && mx > my * 1.2) { stage.setPointerCapture(e.pointerId); grab(e); }
+      else if (my > 8) pending = null;        // vertical: let the page scroll
+      return;
+    }
     if (!dragging) return;
     const dx = e.clientX - lastX, dy = e.clientY - lastY, dms = Math.max(1, e.timeStamp - lastT);
     lastX = e.clientX; lastY = e.clientY; lastT = e.timeStamp;
@@ -247,6 +262,7 @@ function dumbbellHero(root) {
     wake();
   });
   const release = (e) => {
+    pending = null;
     if (!dragging) return;
     dragging = false;
     if (e.type === "pointercancel" || e.timeStamp - lastT > 90) { vx = REVOLVE; vy = 0; }
