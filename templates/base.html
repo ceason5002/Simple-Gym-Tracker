@@ -1,37 +1,62 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-    :root{
-        --bg: {{ theme_vars.bg }};
-        --card: {{ theme_vars.card }};
-        --text: {{ theme_vars.text }};
-        --muted: {{ theme_vars.muted }};
-        --accent: {{ theme_vars.accent }};
-        --border: {{ theme_vars.border }};
-    }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Simple Gym Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="{% static 'styles.css' %}">
+  {% block head %}{% endblock %}
+  <!-- Theme tokens last so they override the stylesheet fallbacks -->
+  <style>
+    :root{
+      --bg: {{ theme_vars.bg }};
+      --card: {{ theme_vars.card }};
+      --text: {{ theme_vars.text }};
+      --muted: {{ theme_vars.muted }};
+      --accent: {{ theme_vars.accent }};
+      --border: {{ theme_vars.border }};
+    }
+  </style>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+<div class="bg-fx" aria-hidden="true"><div class="blob one"></div><div class="blob two"></div></div>
 
 <div class="container">
   <nav class="nav">
-    <span class="brand">Simple Gym Tracker</span>
-
-    {% if user.is_authenticated %}
-      <a class="pill accent" href="{% url 'dashboard' %}">Dashboard</a>
-      <a class="pill" href="{% url 'logout' %}">Logout</a>
-    {% else %}
-      <a class="pill accent" href="{% url 'login' %}">Login</a>
-      <a class="pill" href="{% url 'signup' %}">Sign Up</a>
-    {% endif %}
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 8h7" stroke="currentColor" stroke-width="1.6"/><rect x="1" y="4" width="3.5" height="8" rx="1" fill="currentColor"/><rect x="11.5" y="4" width="3.5" height="8" rx="1" fill="currentColor"/></svg></span><span class="brand-text">Simple Gym Tracker</span>
+    </a>
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        <a class="pill ghost" href="{% url 'theme_settings' %}">Theme</a>
+        <a class="pill ghost" href="{% url 'logout' %}">Logout</a>
+        <a class="pill" href="{% url 'dashboard' %}">Dashboard</a>
+      {% else %}
+        <a class="pill ghost" href="{% url 'login' %}">Login</a>
+        <a class="pill" href="{% url 'signup' %}">Sign Up</a>
+      {% endif %}
+    </div>
   </nav>
+
+  {% if messages %}
+    {% for m in messages %}<div class="msg reveal">{{ m }}</div>{% endfor %}
+  {% endif %}
 
   {% block content %}{% endblock %}
 </div>
 
+<script>
+  // Cursor-following spotlight on cards
+  document.addEventListener("pointermove", function (e) {
+    var card = e.target.closest && e.target.closest(".card");
+    if (!card) return;
+    var r = card.getBoundingClientRect();
+    card.style.setProperty("--mx", (e.clientX - r.left) + "px");
+    card.style.setProperty("--my", (e.clientY - r.top) + "px");
+  });
+</script>
 </body>
 </html>

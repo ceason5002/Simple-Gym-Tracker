@@ -1,55 +1,54 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card">
-  <h1>Your Workouts</h1>
-  <p class="muted">Choose a workout or create a new one.</p>
-
-  <a class="pill accent" href="{% url 'create_workout' %}">+ Create Workout</a>
+<div class="card reveal" style="margin-top:32px">
+  <div class="card-head">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Dashboard</span>
+      <h1>Your Workouts</h1>
+      <p class="muted" style="margin:0">Choose a workout or create a new one.</p>
+    </div>
+    <a class="btn-shine" href="{% url 'create_workout' %}">+ Create Workout</a>
+  </div>
 
   {% if workouts %}
-    <ul style="margin-top:16px">
+    <ul class="tiles">
       {% for workout in workouts %}
-        <li style="margin-bottom:10px">
-          <a class="pill" href="{% url 'workout_detail' workout.id %}">
-            {{ workout.name }}
+        <li>
+          <a class="tile" href="{% url 'workout_detail' workout.id %}">
+            <span>{{ workout.name }}</span><span class="arrow">→</span>
           </a>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p class="muted">No workouts yet.</p>
+    <div class="empty muted">No workouts yet. Create your first one to start logging.</div>
   {% endif %}
 </div>
 
-<div class="card">
+<div class="card reveal">
   <h2>Recent Lifts</h2>
-
   {% if recent %}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Workout</th>
-          <th>Exercise</th>
-          <th>Weight</th>
-          <th>Reps</th>
-          <th>Sets</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in recent %}
-          <tr>
-            <td>{{ e.workout.name }}</td>
-            <td>{{ e.exercise.name }}</td>
-            <td>{{ e.weight }}</td>
-            <td>{{ e.reps }}</td>
-            <td>{{ e.sets }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Workout</th><th>Exercise</th><th>Weight</th><th>Reps</th><th>Sets</th></tr>
+        </thead>
+        <tbody>
+          {% for e in recent %}
+            <tr>
+              <td><span class="badge">{{ e.workout.name }}</span></td>
+              <td>{{ e.exercise.name }}</td>
+              <td class="num">{{ e.weight }}</td>
+              <td class="num">{{ e.reps }}</td>
+              <td class="num">{{ e.sets }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <p class="muted">No lift history yet.</p>
+    <div class="empty muted">No lift history yet.</div>
   {% endif %}
 </div>
 

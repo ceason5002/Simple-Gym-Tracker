@@ -1,0 +1,183 @@
+/* Landing page only. Colours come from the theme tokens set in base.html. */
+html, body{background:var(--bg)}
+body.landing{overflow-x:clip}
+body.landing .bg-fx{display:none}
+body.landing ::selection{background:color-mix(in srgb, var(--accent) 35%, transparent)}
+
+.full-bleed{width:100vw; margin-left:calc(50% - 50vw)}
+.wrap{max-width:1240px; margin:0 auto; padding:0 clamp(20px, 4vw, 56px)}
+
+/* ---------- Hero ---------- */
+.hero3d{
+  position:relative; isolation:isolate;
+  min-height:calc(100vh - 76px); min-height:calc(100dvh - 76px);
+  display:flex; align-items:center;
+  overflow:hidden;
+}
+.hero3d::after{                       /* soft fade into the next section */
+  content:""; position:absolute; inset:auto 0 0; height:120px; z-index:3; pointer-events:none;
+  background:linear-gradient(to bottom, transparent, var(--bg));
+}
+.hero3d__grid{
+  position:relative; width:100%;
+  display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items:center; gap:clamp(16px, 3vw, 48px);
+  padding-top:clamp(24px, 6vh, 64px); padding-bottom:clamp(40px, 8vh, 96px);
+}
+.hero3d__canvas{
+  position:absolute; inset:0; width:100%; height:100%; display:block; z-index:1; pointer-events:none;
+  opacity:0; transition:opacity 1s cubic-bezier(.22,1,.36,1);
+}
+.hero3d.is-ready .hero3d__canvas{opacity:1}
+.hero3d.is-fallback .hero3d__canvas{display:none}
+
+.ghost-word{
+  position:absolute; z-index:0; right:-2vw; top:50%; transform:translateY(-54%);
+  font:400 clamp(160px, 31vw, 480px)/.8 "Anton", Impact, sans-serif;
+  letter-spacing:-.03em; text-transform:uppercase; white-space:nowrap;
+  color:color-mix(in srgb, var(--text) 4.5%, transparent);
+  user-select:none; pointer-events:none;
+}
+
+.hero3d__copy{position:relative; z-index:2; max-width:36rem}
+.eyebrow-line{
+  display:inline-flex; align-items:center; gap:12px;
+  font-size:12px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+  color:color-mix(in srgb, var(--text) 55%, transparent);
+}
+.eyebrow-line::before{content:""; width:32px; height:1px; background:currentColor}
+.hero3d h1{
+  margin:22px 0 22px;
+  font-size:clamp(44px, 6.4vw, 92px); font-weight:500; line-height:.95; letter-spacing:-.045em;
+}
+.hero3d h1 .line{display:block; overflow:hidden; padding-bottom:.06em}
+.hero3d h1 .line > span{display:block}
+.hero3d h1 .soft{color:color-mix(in srgb, var(--text) 45%, transparent)}
+.lede{margin:0 0 34px; max-width:28rem; font-size:17px; line-height:1.6; color:color-mix(in srgb, var(--text) 62%, transparent)}
+
+.actions{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.btn-solid{
+  display:inline-flex; align-items:center; gap:12px;
+  padding:7px 7px 7px 26px; border-radius:999px;
+  background:var(--text); color:var(--bg);
+  font-size:15px; font-weight:500;
+  transition:transform .2s cubic-bezier(.4,0,.2,1);
+}
+.btn-solid .disc{
+  width:38px; height:38px; border-radius:50%; display:grid; place-items:center;
+  background:var(--bg); color:var(--text);
+  transition:transform .3s cubic-bezier(.22,1,.36,1);
+}
+.btn-solid:hover .disc{transform:rotate(-45deg)}
+.btn-solid:active{transform:scale(.97)}
+.btn-text{
+  padding:12px 18px; font-size:15px; font-weight:500;
+  color:color-mix(in srgb, var(--text) 75%, transparent);
+  border-radius:999px; transition:color .2s, background .2s;
+}
+.btn-text:hover{color:var(--text); background:color-mix(in srgb, var(--text) 6%, transparent)}
+.btn-solid:focus-visible, .btn-text:focus-visible, .hero3d__stage:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+.stats{
+  display:flex; gap:28px; margin-top:48px; padding-top:22px;
+  border-top:1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+.stat b{display:block; font-size:24px; font-weight:500; letter-spacing:-.025em; font-variant-numeric:tabular-nums}
+.stat span{font-size:12px; color:color-mix(in srgb, var(--text) 50%, transparent)}
+
+.hero3d__stage{
+  position:relative; z-index:2; align-self:stretch;
+  min-height:clamp(340px, 64vh, 720px);
+  cursor:grab; touch-action:pan-y; user-select:none; -webkit-user-select:none;
+  border-radius:24px; -webkit-tap-highlight-color:transparent;
+}
+.hero3d__stage:active{cursor:grabbing}
+.hero3d__stage::after{                /* ground shadow under the dumbbell */
+  content:""; position:absolute; left:22%; right:22%; bottom:16%; height:6%;
+  background:radial-gradient(closest-side, rgba(0,0,0,.45), transparent);
+  filter:blur(6px); pointer-events:none;
+}
+.drag-hint{
+  position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+  font:500 11px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing:.18em; text-transform:uppercase;
+  color:color-mix(in srgb, var(--text) 40%, transparent);
+}
+.fallback-art{display:none; position:absolute; inset:0; margin:auto; width:min(80%, 520px); color:color-mix(in srgb, var(--text) 70%, transparent)}
+.hero3d.is-fallback .fallback-art{display:block}
+.hero3d.is-fallback .drag-hint{display:none}
+
+/* ---------- Entrance ---------- */
+.rise{animation:rise-in .9s cubic-bezier(.22,1,.36,1) both}
+.hero3d h1 .line > span{animation:line-up 1s cubic-bezier(.16,1,.3,1) both}
+.d1{animation-delay:.1s} .d2{animation-delay:.22s} .d3{animation-delay:.34s}
+.d4{animation-delay:.5s} .d5{animation-delay:.64s} .d6{animation-delay:.8s}
+@keyframes rise-in{from{opacity:0; transform:translateY(24px)}}
+@keyframes line-up{from{transform:translateY(110%)}}
+
+/* ---------- Steps ---------- */
+.section{padding:clamp(96px, 14vh, 160px) 0}
+.section-label{
+  font:500 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing:.2em; text-transform:uppercase;
+  color:color-mix(in srgb, var(--text) 50%, transparent);
+}
+.section h2{
+  margin:18px 0 64px; max-width:16ch;
+  font-size:clamp(32px, 4.4vw, 60px); font-weight:500; line-height:1.02; letter-spacing:-.035em;
+}
+.steps{display:grid; grid-template-columns:repeat(3, 1fr); gap:clamp(20px, 3vw, 40px)}
+.step{padding-top:24px; border-top:1px solid color-mix(in srgb, var(--text) 14%, transparent)}
+.step .n{font-size:clamp(48px, 6vw, 80px); font-weight:300; line-height:1; letter-spacing:-.04em; font-variant-numeric:tabular-nums;
+  color:color-mix(in srgb, var(--text) 30%, transparent)}
+.step h3{margin:22px 0 10px; font-size:20px; font-weight:500; letter-spacing:-.015em}
+.step p{margin:0; max-width:32ch; font-size:15px; line-height:1.6; color:color-mix(in srgb, var(--text) 60%, transparent)}
+
+.reveal-up{opacity:1; transform:none; transition:opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1)}
+.js .reveal-up:not(.is-in){opacity:0; transform:translateY(28px)}
+.steps .reveal-up:nth-child(2){transition-delay:.12s}
+.steps .reveal-up:nth-child(3){transition-delay:.24s}
+
+/* ---------- Closing CTA ---------- */
+.closer{
+  margin:0 0 24px; padding:clamp(56px, 9vw, 112px) clamp(24px, 5vw, 72px);
+  border-radius:clamp(24px, 3vw, 40px);
+  background:var(--card); border:1px solid var(--border);
+  display:flex; align-items:flex-end; justify-content:space-between; gap:32px; flex-wrap:wrap;
+}
+.closer h2{margin:0; font-size:clamp(40px, 6.5vw, 96px); font-weight:500; line-height:.95; letter-spacing:-.045em}
+.closer h2 .soft{color:color-mix(in srgb, var(--text) 40%, transparent)}
+
+.foot{
+  display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  padding:28px 0 8px; font-size:13px; color:color-mix(in srgb, var(--text) 45%, transparent);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:860px){
+  .hero3d{min-height:auto}
+  .hero3d__grid{grid-template-columns:1fr; gap:0; padding-top:0}
+  .hero3d__stage{min-height:40vh; min-height:40svh; order:-1}
+  .drag-hint{display:none}
+  .ghost-word{top:3%; transform:none; right:auto; left:50%; translate:-50% 0; font-size:52vw}
+  .steps{grid-template-columns:1fr}
+  .section h2{margin-bottom:40px}
+}
+@media (max-width:560px){
+  .actions{flex-direction:column; align-items:stretch}
+  .btn-solid{justify-content:space-between}
+  .btn-text{text-align:center}
+  .stats{gap:20px; justify-content:space-between}
+  .stat b{font-size:20px}
+}
+@media (max-height:760px) and (min-width:861px){
+  .hero3d h1{font-size:clamp(40px, 5.4vw, 76px)}
+  .stats{margin-top:32px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rise, .hero3d h1 .line > span{animation:none}
+  .reveal-up, .js .reveal-up:not(.is-in){opacity:1; transform:none; transition:none}
+  .hero3d__canvas{transition:none}
+}
+
+/* Align the shared container with the hero on the landing page */
+body.landing .container{max-width:1240px; padding:0 clamp(20px, 4vw, 56px) 24px}

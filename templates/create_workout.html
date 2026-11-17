@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="card">
+<div class="card card-narrow reveal" style="margin-top:48px">
+  <span class="eyebrow"><span class="dot"></span>New workout</span>
   <h1>Create Workout</h1>
   <p class="muted">Examples: Back + Chest, Push Day, Legs</p>
-
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Create Workout</button>
   </form>
 </div>
-
+<div style="text-align:center"><a class="pill back" href="{% url 'dashboard' %}">← Back to Dashboard</a></div>
 {% endblock %}

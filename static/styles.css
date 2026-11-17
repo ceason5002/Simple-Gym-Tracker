@@ -1,68 +1,270 @@
+/* Fallback tokens; base.html overrides these from the user's chosen theme. */
 :root{
- --bg: #0b0b0b;
+  --bg:#0b0b0b;
   --card:#111111;
   --text:#f2f2f2;
   --muted:#b8b8b8;
   --accent:#686B6D;
   --border:#202020;
+
+  /* Derived tokens: everything below is computed from the theme, so both themes work. */
+  --glow: color-mix(in srgb, var(--accent) 55%, var(--text) 45%);
+  --accent-soft: color-mix(in srgb, var(--accent) 18%, transparent);
+  --surface: color-mix(in srgb, var(--card) 70%, transparent);
+  --input-bg: color-mix(in srgb, var(--bg) 60%, var(--card) 40%);
+  --radius: 18px;
+  --ease: cubic-bezier(.22,1,.36,1);
 }
 
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0;
+  min-height:100vh;
   background:var(--bg);
   color:var(--text);
-  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 a{color:var(--text); text-decoration:none}
-.container{max-width:980px; margin:0 auto; padding:24px}
+h1,h2,.h1{letter-spacing:-.02em; line-height:1.1}
+h1,.h1{font-size:clamp(28px, 5vw, 40px); font-weight:700; margin:4px 0 8px}
+h2{font-size:20px; font-weight:600; margin:0 0 12px}
+.muted{color:var(--muted)}
+
+/* ---------- Ambient background: dotted grid + soft aurora blobs ---------- */
+.bg-fx{position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden}
+.bg-fx::before{
+  content:""; position:absolute; inset:0;
+  background-image:radial-gradient(color-mix(in srgb, var(--text) 10%, transparent) 1px, transparent 1px);
+  background-size:22px 22px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+.blob{
+  position:absolute; width:520px; height:520px; border-radius:50%;
+  filter:blur(90px); opacity:.35;
+  background:var(--accent);
+  animation:drift 18s ease-in-out infinite alternate;
+}
+.blob.one{top:-220px; left:-160px}
+.blob.two{top:-120px; right:-200px; background:var(--glow); opacity:.2; animation-duration:24s}
+@keyframes drift{to{transform:translate(80px, 60px) scale(1.15)}}
+
+/* ---------- Layout ---------- */
+.container{max-width:1040px; margin:0 auto; padding:0 16px 64px}
+@media(min-width:640px){ .container{padding:0 24px 80px} }
+
+/* ---------- Glass nav ---------- */
 .nav{
-  display:flex; gap:14px; align-items:center; justify-content:space-between;
-  border-bottom:1px solid var(--border);
-  padding:14px 0;
+  position:sticky; top:12px; z-index:10;
+  display:flex; gap:10px; align-items:center; justify-content:space-between;
+  margin-top:12px; padding:10px 10px 10px 18px;
+  border:1px solid var(--border); border-radius:999px;
+  background:var(--surface);
+  backdrop-filter:blur(14px) saturate(1.4);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.35);
 }
-.brand{font-weight:700; letter-spacing:.3px}
+.brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-.01em; white-space:nowrap}
+.brand-mark{
+  width:28px; height:28px; border-radius:9px; display:grid; place-items:center;
+  background:linear-gradient(135deg, var(--accent), var(--glow));
+  color:var(--bg); font-size:15px;
+  box-shadow:0 0 18px -2px var(--accent);
+}
+.nav-links{display:flex; gap:6px; align-items:center}
+@media(max-width:520px){ .brand-text{display:none} }
+
+/* ---------- Pills & buttons ---------- */
 .pill{
-  padding:10px 14px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:transparent;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px; font-size:14px; font-weight:500;
+  border:1px solid var(--border); border-radius:999px;
+  background:transparent; color:var(--text);
+  transition:background .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
 }
-.pill.accent{
-  border-color:var(--accent);
-  box-shadow:0 0 0 1px rgba(104,107,109,.25) inset;
+.pill:hover{background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent) 60%, var(--border))}
+.pill:active{transform:scale(.97)}
+.pill.ghost{border-color:transparent}
+.pill.ghost:hover{border-color:var(--border)}
+
+/* Shine button: rotating conic border + sweeping sheen (Cult UI "bg-animate"/shine style) */
+.btn-shine, button{
+  --angle:0deg;
+  position:relative; isolation:isolate;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 22px; font:inherit; font-size:15px; font-weight:600;
+  color:var(--text); cursor:pointer;
+  border:1px solid transparent; border-radius:999px;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    conic-gradient(from var(--angle), var(--border) 0%, var(--glow) 12%, var(--accent) 22%, var(--border) 35%, var(--border) 100%) border-box;
+  animation:spin-border 4s linear infinite;
+  overflow:hidden;
+  transition:transform .25s var(--ease), box-shadow .3s var(--ease);
 }
+.btn-shine::after, button::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(110deg, transparent 30%, color-mix(in srgb, var(--glow) 30%, transparent) 50%, transparent 70%);
+  transform:translateX(-120%);
+  transition:transform .8s var(--ease);
+}
+.btn-shine:hover, button:hover{transform:translateY(-1px); box-shadow:0 8px 28px -8px var(--accent)}
+.btn-shine:hover::after, button:hover::after{transform:translateX(120%)}
+.btn-shine:active, button:active{transform:scale(.98)}
+form button{width:100%; margin-top:6px}
+@property --angle{syntax:"<angle>"; initial-value:0deg; inherits:false}
+@keyframes spin-border{to{--angle:360deg}}
+
+button.danger{
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    conic-gradient(from var(--angle), var(--border) 0%, #ff5a5a 15%, var(--border) 35%, var(--border) 100%) border-box;
+}
+button.danger:hover{box-shadow:0 8px 28px -8px #ff5a5a}
+
+/* ---------- Cards with cursor spotlight (Skiper-style) ---------- */
 .card{
+  --mx:50%; --my:0%;
+  position:relative;
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:16px;
-  padding:18px;
-  margin-top:16px;
+  border-radius:var(--radius);
+  padding:22px;
+  margin-top:18px;
+  overflow:hidden;
 }
-.h1{font-size:36px; margin:10px 0 0}
-.muted{color:var(--muted)}
-.grid{display:grid; grid-template-columns:1fr; gap:12px}
-@media(min-width:900px){ .grid{grid-template-columns:2fr 1fr} }
+.card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--accent-soft), transparent 60%);
+  transition:opacity .4s var(--ease);
+}
+.card:hover::before{opacity:1}
+.card > *{position:relative}
+.card-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.card-narrow{max-width:440px; margin-left:auto; margin-right:auto}
 
-input, button{
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted);
+}
+.eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--glow); box-shadow:0 0 10px var(--glow); animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* ---------- Hero ---------- */
+.hero{text-align:center; padding:72px 0 24px}
+.hero h1{font-size:clamp(40px, 9vw, 76px); font-weight:800; letter-spacing:-.04em; margin:18px 0 16px}
+.gradient-text{
+  background:linear-gradient(90deg, var(--text) 0%, var(--glow) 40%, var(--accent) 60%, var(--text) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:sheen 6s linear infinite;
+}
+@keyframes sheen{to{background-position:-200% center}}
+.hero p{max-width:560px; margin:0 auto; font-size:clamp(15px, 2.2vw, 18px); line-height:1.6}
+.hero-cta{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:28px}
+
+.features{display:grid; grid-template-columns:1fr; gap:14px; margin-top:40px}
+@media(min-width:760px){ .features{grid-template-columns:repeat(3, 1fr)} }
+.features .card{margin-top:0}
+.feature-icon{
+  width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-size:20px;
+  background:var(--accent-soft); border:1px solid var(--border); margin-bottom:12px;
+}
+.features h3{margin:0 0 6px; font-size:16px}
+.features p{margin:0; font-size:14px; line-height:1.55}
+
+/* ---------- Workout tiles ---------- */
+.tiles{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px; margin-top:18px; padding:0; list-style:none}
+.tile{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:16px 18px; border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--input-bg);
+  font-weight:600;
+  transition:transform .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.tile .arrow{color:var(--muted); transition:transform .3s var(--ease), color .3s}
+.tile:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--accent) 70%, var(--border)); box-shadow:0 12px 30px -14px var(--accent)}
+.tile:hover .arrow{transform:translateX(4px); color:var(--text)}
+
+.empty{
+  text-align:center; padding:28px 16px; margin-top:16px;
+  border:1px dashed var(--border); border-radius:14px;
+}
+
+/* ---------- Forms: Halo-style inputs ---------- */
+form p{margin:0 0 14px}
+label{display:block; font-size:13px; font-weight:500; color:var(--muted); margin-bottom:6px}
+input:not([type=hidden]), select{
   width:100%;
-  padding:12px 12px;
+  padding:12px 14px; font:inherit; font-size:15px;
   border-radius:12px;
   border:1px solid var(--border);
-  background:#0e0e0e;
+  background:var(--input-bg);
   color:var(--text);
+  outline:none;
+  transition:border-color .2s var(--ease), box-shadow .25s var(--ease), background .2s;
 }
-button{
-  cursor:pointer;
+input:hover, select:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--border))}
+input:focus, select:focus{
   border-color:var(--accent);
+  box-shadow:0 0 0 4px var(--accent-soft), 0 0 24px -6px var(--accent);
 }
-.table{
-  width:100%;
-  border-collapse:collapse;
-}
-.table th, .table td{
-  padding:10px;
+.form-row{display:grid; grid-template-columns:1fr; gap:0 12px}
+@media(min-width:560px){ .form-row{grid-template-columns:2fr 1fr 1fr 1fr} }
+.helptext, form ul{font-size:12px; color:var(--muted)}
+form ul{margin:6px 0 0; padding-left:18px}
+.errorlist{color:#ff6b6b}
+.form-foot{margin-top:16px; text-align:center; font-size:14px}
+.form-foot a{text-decoration:underline; text-underline-offset:3px}
+
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto; margin:0 -6px}
+.table{width:100%; border-collapse:separate; border-spacing:0; font-size:14px}
+.table th{
+  padding:10px 12px; text-align:left;
+  font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
   border-bottom:1px solid var(--border);
-  text-align:left;
 }
+.table td{padding:12px; border-bottom:1px solid color-mix(in srgb, var(--border) 60%, transparent); white-space:nowrap}
+.table tbody tr{transition:background .2s}
+.table tbody tr:hover{background:var(--accent-soft)}
+.table tbody tr:last-child td{border-bottom:none}
+.num{font-variant-numeric:tabular-nums}
+.badge{
+  display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;
+  background:var(--accent-soft); border:1px solid var(--border);
+}
+
+/* ---------- Theme swatches ---------- */
+.swatches{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; margin:8px 0 16px}
+.swatch{position:relative; cursor:pointer}
+.swatch input{position:absolute; opacity:0; pointer-events:none}
+.swatch-body{
+  display:block; padding:14px; border-radius:14px; border:2px solid var(--border);
+  transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.swatch:hover .swatch-body{transform:translateY(-2px)}
+.swatch input:checked + .swatch-body{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+.swatch-chips{display:flex; gap:6px; margin-bottom:10px}
+.swatch-chips i{width:22px; height:22px; border-radius:50%; border:1px solid rgba(128,128,128,.35)}
+.swatch-name{font-size:14px; font-weight:600; text-transform:capitalize}
+
 .msg{margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid var(--border)}
+.back{margin-top:18px}
+
+/* ---------- Entrance animation (staggered fade-up) ---------- */
+.reveal{opacity:0; transform:translateY(14px); animation:rise .7s var(--ease) forwards}
+.reveal:nth-child(2){animation-delay:.08s}
+.reveal:nth-child(3){animation-delay:.16s}
+.reveal:nth-child(4){animation-delay:.24s}
+.reveal:nth-child(5){animation-delay:.32s}
+@keyframes rise{to{opacity:1; transform:none}}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation:none !important; transition:none !important}
+  .reveal{opacity:1; transform:none}
+}

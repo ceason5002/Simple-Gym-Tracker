@@ -1,19 +1,121 @@
 {% extends "base.html" %}
-{% block content %}
-  <div class="card">
-    <div class="h1">Track lifts. Get stronger.</div>
-    <p class="muted">
-      Simple Gym Tracker lets you create an account, log your main lifts, and see a progressive overload suggestion
-      (add weight, reps, or sets) based on your current numbers.
-    </p>
+{% load static %}
 
-    {% if user.is_authenticated %}
-      <a class="pill accent" href="{% url 'dashboard' %}">Go to Dashboard</a>
-    {% else %}
-      <div style="display:flex; gap:10px; margin-top:12px;">
-        <a class="pill accent" href="{% url 'signup' %}">Create Account</a>
-        <a class="pill" href="{% url 'login' %}">Login</a>
+{% block body_class %}landing{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+  <link rel="stylesheet" href="{% static 'landing.css' %}">
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  } }
+  </script>
+  <script>document.documentElement.classList.add("js")</script>
+{% endblock %}
+
+{% block content %}
+<section class="hero3d full-bleed" aria-labelledby="hero-title">
+  <span class="ghost-word" aria-hidden="true">Iron</span>
+  <canvas class="hero3d__canvas" aria-hidden="true"></canvas>
+
+  <div class="wrap hero3d__grid">
+    <div class="hero3d__copy">
+      <span class="eyebrow-line rise d1">Progressive overload tracker</span>
+      <h1 id="hero-title">
+        <span class="line"><span class="d2">Lift heavier.</span></span>
+        <span class="line"><span class="soft d3">Every week.</span></span>
+      </h1>
+      <p class="lede rise d4">
+        Log each set, see what you moved last session, and know exactly what to add next:
+        a little more weight, one more rep, or another set.
+      </p>
+      <div class="actions rise d5">
+        {% if user.is_authenticated %}
+          <a class="btn-solid" href="{% url 'dashboard' %}">Open dashboard
+            <span class="disc"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </a>
+          <a class="btn-text" href="{% url 'create_workout' %}">New workout</a>
+        {% else %}
+          <a class="btn-solid" href="{% url 'signup' %}">Start logging
+            <span class="disc"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </a>
+          <a class="btn-text" href="{% url 'login' %}">I have an account</a>
+        {% endif %}
       </div>
-    {% endif %}
+      <div class="stats rise d6">
+        <div class="stat"><b>3</b><span>numbers per set</span></div>
+        <div class="stat"><b>1</b><span>next step per lift</span></div>
+        <div class="stat"><b>0</b><span>spreadsheets</span></div>
+      </div>
+    </div>
+
+    <div class="hero3d__stage" data-stage tabindex="0" role="img"
+         aria-label="A 25 pound cast-iron hex dumbbell, slowly revolving. Drag or use the arrow keys to turn it.">
+      <svg class="fallback-art" viewBox="0 0 520 220" fill="none" aria-hidden="true">
+        <rect x="150" y="98" width="220" height="24" rx="12" fill="currentColor" opacity=".55"/>
+        <path d="M40 40h70l30 70-30 70H40l-30-70z" fill="currentColor"/>
+        <path d="M410 40h70l30 70-30 70h-70l-30-70z" fill="currentColor"/>
+      </svg>
+      <span class="drag-hint">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h12M4 4 1 7l3 3M10 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Drag to spin
+      </span>
+    </div>
   </div>
+</section>
+
+<section class="section" aria-labelledby="how-title">
+  <span class="section-label">[ 01 ] How it works</span>
+  <h2 id="how-title">Small jumps, every session.</h2>
+  <div class="steps">
+    <div class="step reveal-up">
+      <div class="n">01</div>
+      <h3>Build a workout</h3>
+      <p>Group your lifts the way you actually train: Push Day, Legs, Back and Biceps.</p>
+    </div>
+    <div class="step reveal-up">
+      <div class="n">02</div>
+      <h3>Log every set</h3>
+      <p>Weight, reps and sets in a few taps. Your history stays with each workout.</p>
+    </div>
+    <div class="step reveal-up">
+      <div class="n">03</div>
+      <h3>Add a little more</h3>
+      <p>Beat last week by one rep or five pounds. Progress you can see, set after set.</p>
+    </div>
+  </div>
+</section>
+
+<section class="closer reveal-up" aria-labelledby="closer-title">
+  <h2 id="closer-title">The bar is loaded.<br><span class="soft">Your move.</span></h2>
+  {% if user.is_authenticated %}
+    <a class="btn-solid" href="{% url 'dashboard' %}">Open dashboard
+      <span class="disc"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  {% else %}
+    <a class="btn-solid" href="{% url 'signup' %}">Start logging
+      <span class="disc"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12 12 4M5.5 4H12v6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  {% endif %}
+</section>
+
+<footer class="foot">
+  <span>Simple Gym Tracker</span>
+  <span>Built for people who write down their sets.</span>
+</footer>
+
+<script type="module" src="{% static 'dumbbell.js' %}"></script>
+<script>
+  // Scroll reveals (once); content stays visible if this never runs
+  (function () {
+    var els = document.querySelectorAll(".reveal-up");
+    if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("is-in"); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
+    }, { threshold: 0.15 });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
 {% endblock %}

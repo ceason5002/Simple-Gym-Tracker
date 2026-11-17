@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="card">
-    <div class="h1">Delete Lift</div>
-    <p>Delete <b>{{ lift.name }}</b>?</p>
+  <div class="card card-narrow reveal" style="margin-top:48px">
+    <h1>Delete Lift</h1>
+    <p>Delete <b>{{ lift.name }}</b>? This can't be undone.</p>
     <form method="post">
       {% csrf_token %}
-      <button type="submit">Confirm delete</button>
+      <button type="submit" class="danger">Confirm delete</button>
     </form>
   </div>
 {% endblock %}

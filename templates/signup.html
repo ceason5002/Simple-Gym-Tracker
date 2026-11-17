@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="card">
-    <div class="h1">Sign Up</div>
+  <div class="card card-narrow reveal" style="margin-top:48px">
+    <span class="eyebrow"><span class="dot"></span>Get started</span>
+    <h1>Sign Up</h1>
     <form method="post">
       {% csrf_token %}
       {{ form.as_p }}
       <button type="submit">Create account</button>
     </form>
+    <p class="form-foot muted">Already have one? <a href="{% url 'login' %}">Login</a></p>
   </div>
 {% endblock %}

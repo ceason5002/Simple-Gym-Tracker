@@ -1,18 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <div class="h1">Theme</div>
+<div class="card reveal" style="margin-top:32px">
+  <span class="eyebrow"><span class="dot"></span>Settings</span>
+  <h1>Theme</h1>
   <form method="post">
     {% csrf_token %}
     <p class="muted">Choose a color scheme:</p>
-    <select name="theme">
+    <div class="swatches">
       {% for k,v in themes.items %}
-        <option value="{{ k }}" {% if k == theme_key %}selected{% endif %}>{{ k }}</option>
+        <label class="swatch">
+          <input type="radio" name="theme" value="{{ k }}" {% if k == theme_key %}checked{% endif %}>
+          <span class="swatch-body" style="background:{{ v.card }}; color:{{ v.text }}">
+            <span class="swatch-chips">
+              <i style="background:{{ v.bg }}"></i><i style="background:{{ v.accent }}"></i><i style="background:{{ v.text }}"></i>
+            </span>
+            <span class="swatch-name">{{ k }}</span>
+          </span>
+        </label>
       {% endfor %}
-    </select>
-    <div style="margin-top:12px;">
-      <button type="submit">Save</button>
     </div>
+    <button type="submit" style="width:auto">Save theme</button>
   </form>
 </div>
 {% endblock %}

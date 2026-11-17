@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="card">
-    <div class="h1">Login</div>
+  <div class="card card-narrow reveal" style="margin-top:48px">
+    <span class="eyebrow"><span class="dot"></span>Welcome back</span>
+    <h1>Login</h1>
     <form method="post">
       {% csrf_token %}
-      <p><label>Username</label><input name="username" /></p>
-      <p><label>Password</label><input name="password" type="password" /></p>
+      <p><label for="id_username">Username</label><input id="id_username" name="username" autocomplete="username" /></p>
+      <p><label for="id_password">Password</label><input id="id_password" name="password" type="password" autocomplete="current-password" /></p>
       <button type="submit">Login</button>
     </form>
+    <p class="form-foot muted">No account? <a href="{% url 'signup' %}">Sign up</a></p>
   </div>
 {% endblock %}
