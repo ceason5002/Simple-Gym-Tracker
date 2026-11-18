@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'suggestions.css' %}">{% endblock %}
+
+{% block content %}
+<div class="s-wrap">
+  <header class="reveal" style="margin-top:32px">
+    <a class="back-link" href="{% url 'dashboard' %}">
+      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4 6 9l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Lifts
+    </a>
+    <span class="eyebrow" style="display:flex"><span class="dot"></span>Suggested workouts</span>
+    <h1>What to train next</h1>
+    <p class="muted s-sub">Built from your lift log, a library of proven programs, and published training research.</p>
+  </header>
+
+  <!-- Up next -->
+  <section class="card up-next reveal" aria-labelledby="up-title">
+    <div class="up-head">
+      <div>
+        <span class="badge">Up next · {{ program.name }}</span>
+        <h2 id="up-title">{{ up_next.day.name }}</h2>
+        <p class="muted up-reason">{{ up_next.reason }}</p>
+        <div class="chips">{% for f in up_next.focus %}<span class="mchip">{{ f }}</span>{% endfor %}</div>
+      </div>
+      <form method="post" action="{% url 'start_workout' %}">
+        {% csrf_token %}
+        <input type="hidden" name="program" value="{{ program_id }}">
+        <input type="hidden" name="day" value="{{ up_next.day.id }}">
+        <button type="submit" class="start-btn">Start this workout</button>
+      </form>
+    </div>
+    <ol class="ex-list">
+      {% for r in up_next.rows %}{% include "_exercise_row.html" %}{% endfor %}
+    </ol>
+  </section>
+
+  <!-- Tips -->
+  {% if tips %}
+  <section class="reveal" aria-labelledby="tips-title">
+    <h2 id="tips-title" class="s-h2">Progress tips</h2>
+    <div class="tips">
+      {% for t in tips %}
+        <div class="tip tip--{{ t.kind }}">
+          <span class="tip-icon" aria-hidden="true">
+            {% if t.kind == "add" %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {% elif t.kind == "stalled" %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            {% elif t.kind == "up" %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 17l6-6 4 4 6-6M20 14V9h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {% else %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>{% endif %}
+          </span>
+          <div><b>{{ t.title }}</b><p class="muted">{{ t.detail }}</p></div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Weekly volume -->
+  <section class="card reveal" aria-labelledby="vol-title">
+    <div class="card-head">
+      <h2 id="vol-title">This week's training</h2>
+      <span class="muted small">Last 7 days</span>
+    </div>
+    {% if has_volume %}
+      <p class="muted small" style="margin-top:0">Hard sets per muscle. The research target is about <b>{{ set_target }} sets</b>, spread over at least <b>{{ freq_target }} days</b>.</p>
+      <div class="vol">
+        {% for key, v in volume.items %}
+          <div class="vol-row{% if v.met %} is-met{% endif %}">
+            <span class="vol-name">{{ v.label }}</span>
+            <span class="vol-bar" role="img" aria-label="{{ v.label }}: {{ v.sets }} of {{ set_target }} sets, {{ v.days }} days"><i style="width:{{ v.pct }}%"></i><em style="left:100%"></em></span>
+            <span class="vol-num">{{ v.sets|floatformat:"-1" }}<span class="muted">/{{ set_target }}</span></span>
+            <span class="vol-days{% if v.freq_met %} is-met{% endif %}" title="Days trained">{{ v.days }}d</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty muted">Log a few lifts this week and you'll see sets per muscle here, compared with research-based targets.</div>
+    {% endif %}
+    <div class="sources">
+      <p><a href="{{ volume_study.url }}" target="_blank" rel="noopener">{{ volume_study.cite }}</a>: {{ volume_study.finding }}</p>
+      <p><a href="{{ freq_study.url }}" target="_blank" rel="noopener">{{ freq_study.cite }}</a>: {{ freq_study.finding }}</p>
+    </div>
+  </section>
+
+  <!-- Programs -->
+  <section class="reveal" aria-labelledby="prog-title">
+    <h2 id="prog-title" class="s-h2">Programs</h2>
+    <div class="programs">
+      {% for p in programs %}
+        <article class="card program{% if p.active %} is-active{% endif %}">
+          <div class="program-head">
+            <div>
+              <h3>{{ p.name }}</h3>
+              <p class="muted">{{ p.blurb }}</p>
+              <div class="chips"><span class="mchip">{{ p.level }}</span><span class="mchip">{{ p.days_per_week }} days/week</span></div>
+            </div>
+            {% if p.active %}
+              <span class="badge following">Following</span>
+            {% else %}
+              <form method="post" action="{% url 'follow_program' %}">{% csrf_token %}<input type="hidden" name="program" value="{{ p.id }}"><button type="submit" class="follow-btn">Follow</button></form>
+            {% endif %}
+          </div>
+          {% for d in p.days %}
+            <details class="day">
+              <summary><span>{{ d.name }}</span><span class="muted">{{ d.focus|join:", " }}</span></summary>
+              <ol class="ex-list">{% for r in d.exercises %}{% include "_exercise_row.html" %}{% endfor %}</ol>
+              <form method="post" action="{% url 'start_workout' %}" class="day-start">
+                {% csrf_token %}
+                <input type="hidden" name="program" value="{{ p.id }}"><input type="hidden" name="day" value="{{ d.id }}">
+                <button type="submit" class="start-btn">Start {{ d.name }}</button>
+              </form>
+            </details>
+          {% endfor %}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <p class="muted small disclaimer">Suggestions are general training guidance, not medical advice. Most cited studies are small trials, often in people new to lifting.</p>
+</div>
+
+{% include "_video_sheet.html" %}
+<script src="{% static 'suggestions.js' %}" defer></script>
+{% endblock %}

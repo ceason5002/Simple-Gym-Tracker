@@ -110,3 +110,6 @@ LOGOUT_REDIRECT_URL = "home"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 # Free key from https://api.data.gov/signup/ (DEMO_KEY is used when unset; it allows very few requests)
 USDA_API_KEY = os.getenv("USDA_API_KEY", "")
+
+# YouTube Data API v3 key (Google Cloud console). Without it, "Watch how" opens a YouTube search instead.
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")

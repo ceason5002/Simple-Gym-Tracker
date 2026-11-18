@@ -241,3 +241,146 @@ class CustomThemeViewTests(TestCase):
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.theme, "pink_white_red")
         self.assertContains(self.client.get(reverse("theme_settings")), 'data-panel="custom"')
+
+
+import datetime as _dt
+from types import SimpleNamespace as _NS
+from . import coach, workout_library as lib, evidence
+from .models import Workout, Exercise, LiftEntry, PlannedExercise, VideoCache
+
+
+def _entry(name, weight, reps, sets, days_ago, today=_dt.date(2026, 11, 18)):
+    d = today - _dt.timedelta(days=days_ago)
+    return _NS(exercise=_NS(name=name), weight=Decimal(str(weight)), reps=reps, sets=sets,
+               logged_at=_dt.datetime(d.year, d.month, d.day, 12, 0))
+
+
+class LibraryTests(TestCase):
+    def test_matching_aliases_and_contains(self):
+        self.assertEqual(lib.match_exercise("Bench"), "bench_press")
+        self.assertEqual(lib.match_exercise("  Bench-Press "), "bench_press")
+        self.assertEqual(lib.match_exercise("Paused bench press"), "bench_press")
+        self.assertEqual(lib.match_exercise("RDL"), "rdl")
+        self.assertEqual(lib.match_exercise("Seated Leg Curl"), "leg_curl")
+        self.assertIsNone(lib.match_exercise("Underwater basket weaving"))
+
+    def test_programs_reference_real_exercises(self):
+        for p in lib.PROGRAMS.values():
+            for d in p["days"]:
+                self.assertTrue(set(d["focus"]) <= set(lib.GROUPS))
+                for ex_id, sets, reps in d["exercises"]:
+                    self.assertIn(ex_id, lib.EXERCISES)
+
+    def test_evidence_links_are_complete(self):
+        for key, (study, how) in evidence.EXERCISE_EVIDENCE.items():
+            self.assertIn(key, lib.EXERCISES)
+            self.assertTrue(evidence.STUDIES[study]["url"].startswith("https://"))
+
+
+class CoachTests(TestCase):
+    today = _dt.date(2026, 11, 18)
+
+    def hist(self, *entries):
+        return coach.build_history(entries)
+
+    def test_add_weight_after_hitting_reps_twice(self):
+        h = self.hist(_entry("Bench Press", 135, 8, 3, 4), _entry("Bench Press", 135, 9, 3, 1))["bench_press"]
+        t = coach.tip_for(h)
+        self.assertEqual((t["kind"], t["next_weight"]), ("add", Decimal("140")))
+
+    def test_lower_body_jumps_are_bigger(self):
+        h = self.hist(_entry("Squat", 225, 8, 3, 4), _entry("Squat", 225, 8, 3, 1))["squat"]
+        self.assertEqual(coach.tip_for(h)["next_weight"], Decimal("235"))
+
+    def test_stalled_suggests_deload_and_swap(self):
+        h = self.hist(_entry("OHP", 95, 6, 3, 9), _entry("OHP", 95, 6, 3, 5), _entry("OHP", 95, 5, 3, 1))["ohp"]
+        t = coach.tip_for(h)
+        self.assertEqual(t["kind"], "stalled")
+        self.assertEqual(t["next_weight"], Decimal("85"))      # 90% of 95 = 85.5 -> nearest 2.5 lb
+        self.assertIn("swap in", t["detail"])
+
+    def test_progressing_lift_is_not_stalled(self):
+        h = self.hist(_entry("Row", 135, 8, 3, 9), _entry("Barbell Row", 140, 8, 3, 5), _entry("Barbell Row", 145, 6, 3, 1))["barbell_row"]
+        self.assertEqual(coach.tip_for(h)["kind"], "up")
+
+    def test_top_set_per_day(self):
+        h = self.hist(_entry("Bench", 135, 10, 1, 1), _entry("Bench", 155, 5, 1, 1))["bench_press"]
+        self.assertEqual(len(h.sessions), 1)
+        self.assertEqual(h.last.weight, Decimal("155"))
+
+    def test_next_day_picks_most_rested(self):
+        hist = self.hist(_entry("Bench", 135, 8, 3, 1), _entry("Deadlift", 225, 5, 3, 2), _entry("Squat", 185, 5, 3, 6))
+        day, reason = coach.next_day("ppl", hist, self.today)
+        self.assertEqual(day["id"], "legs")
+        self.assertIn("6 days ago", reason)
+
+    def test_weekly_volume_counts_primary_and_half_secondary(self):
+        entries = [_entry("Bench", 135, 8, 4, 1), _entry("Bench", 135, 8, 4, 3), _entry("Bench", 135, 8, 4, 10)]
+        v = coach.weekly_volume(entries, self.today)
+        self.assertEqual(v["chest"]["sets"], 8)        # the 10-day-old session is outside the week
+        self.assertEqual(v["chest"]["days"], 2)
+        self.assertEqual(v["triceps"]["sets"], 4)      # secondary = half
+
+
+@override_settings(STORAGES={"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}},
+                   YOUTUBE_API_KEY="")
+class SuggestionViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("sv", password="x")
+        self.client.force_login(self.user)
+        w = Workout.objects.create(user=self.user, name="Old")
+        ex = Exercise.objects.create(user=self.user, name="Bench Press")
+        for days_ago, reps in ((3, 8), (1, 9)):
+            e = LiftEntry.objects.create(user=self.user, workout=w, exercise=ex, weight=135, reps=reps, sets=3)
+            LiftEntry.objects.filter(id=e.id).update(logged_at=timezone.now() - _dt.timedelta(days=days_ago))
+
+    def test_page_renders_with_evidence(self):
+        r = self.client.get(reverse("suggestions"))
+        self.assertContains(r, "What to train next")
+        self.assertContains(r, "pubmed.ncbi.nlm.nih.gov")
+        self.assertContains(r, "This week")
+
+    def test_start_workout_creates_plan_with_weights(self):
+        r = self.client.post(reverse("start_workout"), {"program": "ppl", "day": "push"})
+        w = Workout.objects.get(user=self.user, name__startswith="Push")
+        self.assertRedirects(r, reverse("workout_detail", args=[w.id]))
+        plan = list(w.plan.all())
+        self.assertEqual(plan[0].name, "Barbell Bench Press")
+        self.assertEqual(plan[0].suggested_weight, 140)     # 135 x8 then x9 -> add 5 lb
+        page = self.client.get(reverse("workout_detail", args=[w.id]))
+        self.assertContains(page, "Today's plan")
+        # starting the same day twice makes a second, uniquely named workout
+        self.client.post(reverse("start_workout"), {"program": "ppl", "day": "push"})
+        self.assertEqual(Workout.objects.filter(user=self.user, name__startswith="Push").count(), 2)
+
+    def test_start_rejects_unknown_day(self):
+        self.client.post(reverse("start_workout"), {"program": "ppl", "day": "nope"})
+        self.assertFalse(Workout.objects.filter(user=self.user, name__startswith="nope").exists())
+
+    def test_follow_program(self):
+        self.client.post(reverse("follow_program"), {"program": "upper_lower"})
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.active_program, "upper_lower")
+        self.client.post(reverse("follow_program"), {"program": "made_up"})
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.active_program, "upper_lower")
+
+    def test_videos_without_key_returns_search_link(self):
+        d = self.client.get(reverse("suggestions_api_videos"), {"ex": "bench_press"}).json()
+        self.assertEqual(d["videos"], [])
+        self.assertIn("youtube.com/results", d["search_url"])
+
+    def test_videos_use_cache(self):
+        VideoCache.objects.create(query=coach.video_query("Barbell Bench Press"),
+                                  results=[{"id": "abc", "title": "t", "channel": "c", "thumb": "https://x/y.jpg"}])
+        with override_settings(YOUTUBE_API_KEY="k"), mock.patch("httpx.Client") as client:
+            d = self.client.get(reverse("suggestions_api_videos"), {"ex": "bench_press"}).json()
+            client.assert_not_called()
+        self.assertEqual(d["videos"][0]["id"], "abc")
+
+    def test_other_users_cannot_see_plan(self):
+        self.client.post(reverse("start_workout"), {"program": "ppl", "day": "legs"})
+        w = Workout.objects.get(user=self.user, name__startswith="Legs")
+        other = User.objects.create_user("o", password="x")
+        self.client.force_login(other)
+        self.assertEqual(self.client.get(reverse("workout_detail", args=[w.id])).status_code, 404)

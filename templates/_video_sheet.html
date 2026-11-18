@@ -1,0 +1,21 @@
+{# "Watch how" sheet: YouTube form videos for an exercise. Include once per page with suggestions.js. #}
+<dialog class="v-sheet" id="video-sheet" aria-labelledby="v-title">
+  <div class="v-panel">
+    <div class="v-top">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>Watch how</span>
+        <h2 id="v-title">Exercise</h2>
+      </div>
+      <button type="button" class="v-close" data-close-video aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m4 4 10 10M14 4 4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="v-player" id="v-player" hidden></div>
+    <div class="v-list" id="v-list" aria-live="polite"></div>
+    <a class="v-search" id="v-search" href="#" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M13 3 7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      More videos on YouTube
+    </a>
+  </div>
+</dialog>
+<script>window.SUGGEST = {videos: "{% url 'suggestions_api_videos' %}"};</script>

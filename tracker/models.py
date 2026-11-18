@@ -38,6 +38,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     theme = models.CharField(max_length=30, default="dark_gray")
     custom_theme = models.JSONField(default=dict, blank=True)   # {bg, card, text, accent}, see theme.clean_custom
+    active_program = models.CharField(max_length=30, default="ppl")   # key in workout_library.PROGRAMS
 
     def __str__(self):
         return self.user.username
@@ -129,3 +130,29 @@ class WaterLog(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+# ---------------------------------------------------------------------------
+# Suggested workouts
+# ---------------------------------------------------------------------------
+
+class PlannedExercise(models.Model):
+    """An exercise suggested for a workout started from a program (a checklist on the workout page)."""
+    workout = models.ForeignKey(Workout, on_delete=models.CASCADE, related_name="plan")
+    library_id = models.CharField(max_length=40, blank=True)
+    name = models.CharField(max_length=80)
+    sets = models.PositiveSmallIntegerField(default=3)
+    reps = models.CharField(max_length=12, default="8-12")
+    suggested_weight = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True)
+    note = models.CharField(max_length=140, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+
+class VideoCache(models.Model):
+    """YouTube search results, cached so the free API quota (about 100 searches/day) goes a long way."""
+    query = models.CharField(max_length=120, unique=True)
+    results = models.JSONField(default=list)
+    fetched_at = models.DateTimeField(auto_now=True)

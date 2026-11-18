@@ -26,6 +26,17 @@
   {% endif %}
 </div>
 
+<a class="card reveal suggest-card" href="{% url 'suggestions' %}">
+  <span class="suggest-icon" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.9 1.2 5.8L12 16.1 7.1 19l1.2-5.8L4 9.3l5.6-.7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+  </span>
+  <span class="suggest-text">
+    <b>Suggested workouts</b>
+    <span class="muted">What to train next, progress tips and proven programs, backed by training research.</span>
+  </span>
+  <span class="arrow" aria-hidden="true">→</span>
+</a>
+
 <div class="card reveal">
   <h2>Recent Lifts</h2>
   {% if recent %}

@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import Workout, Exercise, LiftEntry
 from .forms import WorkoutForm, LiftEntryForm, SignUpForm
+from . import evidence
+from .workout_library import norm
 from .theme import THEMES, CUSTOM_DEFAULT, CUSTOM_FIELDS, STARTERS, clean_custom
 
 def home(request):
@@ -67,9 +69,17 @@ def create_workout(request):
 @login_required
 def workout_detail(request, workout_id):
     workout = get_object_or_404(Workout, id=workout_id, user=request.user)
-    entries = LiftEntry.objects.filter(user=request.user, workout=workout)[:50]
+    entries = LiftEntry.objects.filter(user=request.user, workout=workout).select_related("exercise")[:50]
     form = LiftEntryForm(initial={"workout_id": workout.id})
-    return render(request, "workout_detail.html", {"workout": workout, "entries": entries, "form": form})
+    logged = {norm(e.exercise.name) for e in entries}
+    plan = list(workout.plan.all())
+    for p in plan:
+        p.done = norm(p.name) in logged
+        p.evidence = evidence.for_exercise(p.library_id)
+    return render(request, "workout_detail.html", {
+        "workout": workout, "entries": entries, "form": form, "plan": plan,
+        "plan_done": sum(p.done for p in plan),
+    })
 
 
 @login_required

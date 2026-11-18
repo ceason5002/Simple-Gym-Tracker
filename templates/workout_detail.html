@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'suggestions.css' %}">{% endblock %}
 {% block content %}
 
 <div class="card reveal" style="margin-top:32px">
@@ -7,7 +9,35 @@
   <p class="muted" style="margin:0">Add exercises performed in this workout.</p>
 </div>
 
-<div class="card reveal">
+{% if plan %}
+<div class="card reveal" aria-labelledby="plan-title">
+  <div class="plan-head">
+    <h2 id="plan-title" style="margin:0">Today's plan</h2>
+    <span class="plan-progress">{{ plan_done }} / {{ plan|length }} done</span>
+  </div>
+  <div class="plan-bar" aria-hidden="true"><i style="width:{% widthratio plan_done plan|length 100 %}%"></i></div>
+  <p class="muted small" style="margin:6px 0 0">Tap an exercise to fill in the log form with the suggested numbers.</p>
+  <ul class="plan-list">
+    {% for p in plan %}
+      <li class="plan-item{% if p.done %} is-done{% endif %}">
+        <button type="button" class="plan-fill"
+                data-fill='{"name":"{{ p.name|escapejs }}","sets":{{ p.sets }},"reps":"{{ p.reps|escapejs }}","weight":{% if p.suggested_weight %}{{ p.suggested_weight|floatformat:"-1" }}{% else %}null{% endif %}}'>
+          <span class="plan-check" aria-hidden="true">{% if p.done %}<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="m2.5 6.5 2.3 2.3L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endif %}</span>
+          <span class="plan-text">
+            <span class="plan-name">{{ p.name }}</span>
+            <span class="plan-meta">{{ p.sets }} × {{ p.reps }}{% if p.suggested_weight %} · {{ p.suggested_weight|floatformat:"-1" }} lb{% endif %}{% if p.note %} · {{ p.note }}{% endif %}</span>
+          </span>
+        </button>
+        <button type="button" class="watch" data-watch="{{ p.library_id }}" data-name="{{ p.name }}" aria-label="Watch how to do {{ p.name }}">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg><span>Watch</span>
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="card reveal" id="log-form">
   <h2>Add Lift</h2>
   <form method="post" action="{% url 'add_entry' %}">
     {% csrf_token %}
@@ -50,4 +80,6 @@
 
 <a class="pill back" href="{% url 'dashboard' %}">← Back to Dashboard</a>
 
+{% include "_video_sheet.html" %}
+<script src="{% static 'suggestions.js' %}" defer></script>
 {% endblock %}

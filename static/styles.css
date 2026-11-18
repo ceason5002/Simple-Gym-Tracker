@@ -277,3 +277,12 @@ form ul{margin:6px 0 0; padding-left:18px}
   .nav-links{gap:2px}
   .nav .pill{padding:8px 11px; font-size:13px}
 }
+
+/* Lifts dashboard: entry card for suggested workouts */
+.suggest-card{display:flex; align-items:center; gap:14px; transition:transform .3s var(--ease), border-color .3s var(--ease)}
+.suggest-card:hover{transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 60%, var(--border))}
+.suggest-icon{flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:var(--accent-soft); border:1px solid var(--border)}
+.suggest-text{display:flex; flex-direction:column; gap:3px; flex:1}
+.suggest-text .muted{font-size:14px}
+.suggest-card .arrow{color:var(--muted); font-size:20px; transition:transform .3s var(--ease)}
+.suggest-card:hover .arrow{transform:translateX(4px); color:var(--text)}

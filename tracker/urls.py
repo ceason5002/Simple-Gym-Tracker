@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, nutrition_views as nv
+from . import views, nutrition_views as nv, suggestions_views as sv
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -12,6 +12,12 @@ urlpatterns = [
     path("workouts/<int:workout_id>/", views.workout_detail, name="workout_detail"),
     path("entries/add/", views.add_entry, name="add_entry"),
     path("settings/theme/", views.theme_settings, name="theme_settings"),
+
+    # Suggested workouts
+    path("suggestions/", sv.suggestions, name="suggestions"),
+    path("suggestions/follow/", sv.follow_program, name="follow_program"),
+    path("suggestions/start/", sv.start_workout, name="start_workout"),
+    path("suggestions/api/videos/", sv.api_videos, name="suggestions_api_videos"),
 
     # NutrientAI
     path("nutrition/", nv.nutrition_dashboard, name="nutrition"),
