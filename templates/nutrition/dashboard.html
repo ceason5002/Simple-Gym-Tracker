@@ -232,6 +232,43 @@
   </div>
 </dialog>
 
+<!-- Custom water amount -->
+<dialog class="mini-dialog" id="water-dialog" aria-labelledby="w-title">
+  <form class="mini-panel" id="water-form" novalidate>
+    <div class="mini-top">
+      <div class="mini-glass" aria-hidden="true"><span id="w-fill"></span></div>
+      <div>
+        <h2 id="w-title">Add water</h2>
+        <p class="muted" id="w-preview"></p>
+      </div>
+      <button type="button" class="n-icon" data-close-water aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="m4 4 10 10M14 4 4 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="w-entry">
+      <input id="w-amount" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 12" aria-label="Amount" aria-describedby="w-error">
+      <div class="seg" id="w-unit" role="radiogroup" aria-label="Unit">
+        <button type="button" role="radio" data-unit="oz" aria-checked="true">oz</button>
+        <button type="button" role="radio" data-unit="ml" aria-checked="false">ml</button>
+      </div>
+    </div>
+    <p class="w-error" id="w-error" role="alert"></p>
+
+    <div class="w-presets" aria-label="Common amounts">
+      <button type="button" class="chip" data-preset="4">4 oz</button>
+      <button type="button" class="chip" data-preset="12">12 oz</button>
+      <button type="button" class="chip" data-preset="20">20 oz</button>
+      <button type="button" class="chip" data-preset="32">32 oz</button>
+    </div>
+
+    <div class="mini-actions">
+      <button type="button" class="pill" data-close-water>Cancel</button>
+      <button type="submit" id="w-submit" class="w-submit">Add water</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 {{ day|json_script:"day-data" }}

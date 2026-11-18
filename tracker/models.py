@@ -37,6 +37,7 @@ class LiftEntry(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     theme = models.CharField(max_length=30, default="dark_gray")
+    custom_theme = models.JSONField(default=dict, blank=True)   # {bg, card, text, accent}, see theme.clean_custom
 
     def __str__(self):
         return self.user.username

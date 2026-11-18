@@ -3,6 +3,26 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
+window.__dumbbellLoaded = true;   // lets the page's watchdog know the module ran
+
+// Add ?dbg=1 to the URL to see live status on screen (handy on a phone)
+const DEBUG = new URLSearchParams(location.search).has("dbg");
+const dbgLines = [];
+let dbgBox = null;
+function dbg(msg) {
+  dbgLines.push(`${(performance.now() / 1000).toFixed(1)}s ${msg}`);
+  if (!DEBUG) return;
+  if (!dbgBox) {
+    dbgBox = document.createElement("pre");
+    dbgBox.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;margin:0;padding:10px;" +
+      "font:11px/1.4 ui-monospace,Menlo,monospace;color:#9f9;background:rgba(0,0,0,.85);border-radius:10px;" +
+      "max-height:45vh;overflow:auto;white-space:pre-wrap;pointer-events:none";
+    document.body.appendChild(dbgBox);
+  }
+  dbgBox.textContent = dbgLines.slice(-14).join("\n");
+}
+dbg("module loaded");
+
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
@@ -139,20 +159,30 @@ function dumbbellHero(root) {
   const canvas = root.querySelector(".hero3d__canvas");
   const stage = root.querySelector("[data-stage]");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-  let renderer, raf = 0, visible = true, dead = false;
+  let renderer, raf = 0, visible = true, dead = false, frames = 0;
 
   const fail = () => {
+    dbg("fallback shown");
     dead = true; cancelAnimationFrame(raf);
     root.classList.remove("is-ready"); root.classList.add("is-fallback");
   };
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-  } catch (e) { fail(); return; }
+  } catch (e) { dbg("no WebGL: " + e.message); fail(); return; }
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
-  canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); fail(); });
+  // Phones drop WebGL contexts when the tab is backgrounded or memory is tight.
+  // preventDefault() asks the browser to restore it; three.js rebuilds its state then.
+  let lostTimer = 0, lost = false;
+  canvas.addEventListener("webglcontextlost", (e) => {
+    e.preventDefault(); lost = true; cancelAnimationFrame(raf); raf = 0; dbg("context lost");
+    lostTimer = setTimeout(fail, 5000);          // only give up if it never comes back
+  });
+  canvas.addEventListener("webglcontextrestored", () => {
+    clearTimeout(lostTimer); lost = false; dbg("context restored"); layout(); wake();
+  });
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -176,10 +206,11 @@ function dumbbellHero(root) {
   pivot.rotation.set(0.32, 0, -0.14);
 
   let baseDist = 10;
-  let yaw = reduce.matches ? 0.65 : 0, pitch = 0;
+  let yaw = 0, pitch = 0;
   let vx = 0, vy = 0, dragging = false, last = 0, lastInput = 0;
   const introStart = performance.now();
   const REVOLVE = 0.38;                     // rad/s ambient revolve
+  const REVOLVE_CALM = 0.16;                // with "reduce motion" on: slow turn, no intro, bob or throw
 
   function layout() {
     const W = canvas.clientWidth, H = canvas.clientHeight;
@@ -207,7 +238,7 @@ function dumbbellHero(root) {
     const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
     const rm = reduce.matches;
     if (!dragging) {
-      if (rm) { vx = vy = 0; }
+      if (rm) { vx = REVOLVE_CALM; vy = 0; }
       else {
         // inertia blends back into the steady revolve
         const k = Math.exp(-3 * dt);
@@ -226,9 +257,10 @@ function dumbbellHero(root) {
     spin.rotation.y = yaw + (1 - intro) * -1.4;
 
     renderer.render(scene, camera);
-    if (visible && !dead && (!rm || dragging || intro < 1)) raf = requestAnimationFrame(tick);
+    frames++;
+    if (visible && !dead && !lost) raf = requestAnimationFrame(tick);
   }
-  function wake() { if (!raf && visible && !dead) { last = performance.now(); raf = requestAnimationFrame(tick); } }
+  function wake() { if (!raf && visible && !dead && !lost) { last = performance.now(); raf = requestAnimationFrame(tick); } }
 
   // Drag to spin
   // Touch only grabs the dumbbell once the finger clearly moves sideways, so a vertical
@@ -286,7 +318,17 @@ function dumbbellHero(root) {
   document.fonts?.ready.then(layout);
 
   layout();
-  const reveal = () => { if (!dead) { root.classList.add("is-ready"); wake(); } };
+  const reveal = () => { if (!dead) { root.classList.remove("is-fallback"); root.classList.add("is-ready"); dbg("ready, animating"); wake(); } };
+  if (DEBUG) {
+    const gl = renderer.getContext();
+    dbg(`webgl${renderer.capabilities.isWebGL2 ? "2" : "1"} · dpr ${devicePixelRatio} · reduce-motion ${reduce.matches} · ${innerWidth}x${innerHeight}`);
+    let lastFrames = 0;
+    setInterval(() => {
+      dbg(`fps ${frames - lastFrames} · visible ${visible} · lost ${lost} · dead ${dead} · yaw ${yaw.toFixed(2)} · canvas ${canvas.width}x${canvas.height}`);
+      lastFrames = frames;
+    }, 1000);
+    gl && dbg("renderer " + (gl.getParameter(gl.VERSION) || ""));
+  }
   renderer.compileAsync ? renderer.compileAsync(scene, camera).then(reveal, reveal) : reveal();
 }
 

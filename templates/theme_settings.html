@@ -1,11 +1,24 @@
 {% extends "base.html" %}
+{% load static %}
+{% block head %}<link rel="stylesheet" href="{% static 'theme.css' %}">{% endblock %}
+
 {% block content %}
-<div class="card reveal" style="margin-top:32px">
-  <span class="eyebrow"><span class="dot"></span>Settings</span>
-  <h1>Theme</h1>
-  <form method="post">
+<div class="t-wrap">
+  <div class="reveal" style="margin-top:32px">
+    <span class="eyebrow"><span class="dot"></span>Settings</span>
+    <h1>Theme</h1>
+  </div>
+
+  <div class="t-tabs reveal" role="tablist" data-active="{{ tab }}">
+    <span class="t-tab-ind" aria-hidden="true"></span>
+    <button type="button" role="tab" class="t-tab" data-tab="presets" aria-selected="{% if tab == 'presets' %}true{% else %}false{% endif %}">Presets</button>
+    <button type="button" role="tab" class="t-tab" data-tab="custom" aria-selected="{% if tab == 'custom' %}true{% else %}false{% endif %}">Custom</button>
+  </div>
+
+  <!-- Presets -->
+  <form method="post" class="card reveal t-panel" data-panel="presets" {% if tab != 'presets' %}hidden{% endif %}>
     {% csrf_token %}
-    <p class="muted">Choose a color scheme:</p>
+    <p class="muted" style="margin-top:0">Pick a ready-made colour scheme.</p>
     <div class="swatches">
       {% for k,v in themes.items %}
         <label class="swatch">
@@ -21,5 +34,80 @@
     </div>
     <button type="submit" style="width:auto">Save theme</button>
   </form>
+
+  <!-- Custom -->
+  <form method="post" class="t-panel t-custom" data-panel="custom" id="custom-form" {% if tab != 'custom' %}hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="theme" value="custom">
+
+    <div class="card reveal">
+      <h2>Start from</h2>
+      <div class="starters">
+        {% for name, c in starters.items %}
+          <button type="button" class="starter" data-starter='{"bg":"{{ c.bg }}","card":"{{ c.card }}","text":"{{ c.text }}","accent":"{{ c.accent }}"}'>
+            <span class="starter-swatch" style="background:{{ c.bg }}">
+              <i style="background:{{ c.card }}"></i><i style="background:{{ c.accent }}"></i><i style="background:{{ c.text }}"></i>
+            </span>
+            <span>{{ name }}</span>
+          </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="t-grid">
+      <div class="card reveal">
+        <h2>Your colours</h2>
+        <div class="pickers">
+          <div class="picker">
+            <label class="picker-swatch"><input type="color" data-color="bg" value="{{ custom.bg|default:'#0f1115' }}" aria-label="Background colour"></label>
+            <div><span class="picker-name">Background</span><span class="muted picker-hint">Page behind everything</span></div>
+            <input class="hex" name="bg" data-hex="bg" value="{{ custom.bg }}" maxlength="7" spellcheck="false" aria-label="Background hex">
+          </div>
+          <div class="picker">
+            <label class="picker-swatch"><input type="color" data-color="card" value="{{ custom.card|default:'#171a21' }}" aria-label="Card colour"></label>
+            <div><span class="picker-name">Cards</span><span class="muted picker-hint">Panels, inputs and the nav</span></div>
+            <input class="hex" name="card" data-hex="card" value="{{ custom.card }}" maxlength="7" spellcheck="false" aria-label="Card hex">
+          </div>
+          <div class="picker">
+            <label class="picker-swatch"><input type="color" data-color="text" value="{{ custom.text|default:'#f1f3f7' }}" aria-label="Text colour"></label>
+            <div><span class="picker-name">Text</span><span class="muted picker-hint">Headings and body copy</span></div>
+            <input class="hex" name="text" data-hex="text" value="{{ custom.text }}" maxlength="7" spellcheck="false" aria-label="Text hex">
+          </div>
+          <div class="picker">
+            <label class="picker-swatch"><input type="color" data-color="accent" value="{{ custom.accent|default:'#5b8cff' }}" aria-label="Accent colour"></label>
+            <div><span class="picker-name">Accent</span><span class="muted picker-hint">Glows, focus rings, highlights</span></div>
+            <input class="hex" name="accent" data-hex="accent" value="{{ custom.accent }}" maxlength="7" spellcheck="false" aria-label="Accent hex">
+          </div>
+        </div>
+        <p class="muted small">Secondary text and borders are mixed automatically from these.</p>
+      </div>
+
+      <div class="card reveal preview-card">
+        <div class="card-head">
+          <h2>Preview</h2>
+          <span class="contrast" id="contrast" aria-live="polite"></span>
+        </div>
+        <div class="preview" id="preview">
+          <div class="pv-nav"><span class="pv-mark"></span><span class="pv-brand">Simple Gym Tracker</span><span class="pv-pill">NutrientAI</span></div>
+          <div class="pv-card">
+            <div class="pv-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" class="pv-track"/><circle cx="50" cy="50" r="40" class="pv-bar"/></svg><b>1,240</b></div>
+            <div>
+              <div class="pv-title">Calories</div>
+              <div class="pv-muted">760 remaining today</div>
+              <span class="pv-btn">Add food</span>
+            </div>
+          </div>
+        </div>
+        <p class="muted small">The whole page previews your colours as you pick. Nothing is saved until you press Save.</p>
+      </div>
+    </div>
+
+    <div class="t-actions reveal">
+      <button type="button" class="pill" id="reset-preview">Reset</button>
+      <button type="submit" id="save-custom">Save custom theme</button>
+    </div>
+  </form>
 </div>
+
+<script src="{% static 'theme.js' %}" defer></script>
 {% endblock %}

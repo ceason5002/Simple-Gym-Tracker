@@ -5,18 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import Workout, Exercise, LiftEntry
 from .forms import WorkoutForm, LiftEntryForm, SignUpForm
-from .theme import THEMES
+from .theme import THEMES, CUSTOM_DEFAULT, CUSTOM_FIELDS, STARTERS, clean_custom
 
-@login_required
-def theme_settings(request):
-    if request.method == "POST":
-        theme = request.POST.get("theme", "dark_gray")
-        if theme in THEMES:
-            request.user.profile.theme = theme
-            request.user.profile.save()
-        return redirect("theme_settings")
-    return render(request, "theme_settings.html", {"themes": THEMES})
-    
 def home(request):
     return render(request, "home.html")
 
@@ -110,10 +100,29 @@ def add_entry(request):
 
 @login_required
 def theme_settings(request):
+    profile = request.user.profile
+    custom = profile.custom_theme if profile.custom_theme else dict(CUSTOM_DEFAULT)
     if request.method == "POST":
         theme = request.POST.get("theme", "dark_gray")
-        if theme in THEMES:
-            request.user.profile.theme = theme
-            request.user.profile.save()
+        if theme == "custom":
+            try:
+                custom = clean_custom({f: request.POST.get(f) for f in CUSTOM_FIELDS})
+            except ValueError as e:
+                messages.error(request, str(e))
+                return render(request, "theme_settings.html", {
+                    "themes": THEMES, "custom": {f: request.POST.get(f, "") for f in CUSTOM_FIELDS},
+                    "starters": STARTERS, "tab": "custom",
+                }, status=400)
+            profile.custom_theme = custom
+            profile.theme = "custom"
+            profile.save()
+            messages.success(request, "Custom theme saved.")
+        elif theme in THEMES:
+            profile.theme = theme
+            profile.save()
+            messages.success(request, "Theme updated.")
         return redirect("theme_settings")
-    return render(request, "theme_settings.html", {"themes": THEMES})
+    return render(request, "theme_settings.html", {
+        "themes": THEMES, "custom": custom, "starters": STARTERS,
+        "tab": "custom" if profile.theme == "custom" else "presets",
+    })

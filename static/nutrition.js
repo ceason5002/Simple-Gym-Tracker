@@ -159,20 +159,85 @@
   }));
 
   /* ---------- water ---------- */
-  $$("[data-water]").forEach((b) => b.addEventListener("click", async () => {
-    let oz = b.dataset.water;
-    if (oz === "custom") {
-      oz = prompt("How many ounces?", "12");
-      if (oz === null) return;
-      oz = parseFloat(oz);
-      if (!(oz > 0 && oz <= 200)) { toast("Enter an amount between 0.5 and 200 oz", true); return; }
-    }
+  async function addWater(oz) {
     try {
       day = await api(API.water, { date: day.date, oz: Number(oz) });
       renderRings();
       toast(`+${fmt(oz, 1)} oz water`);
-    } catch (e) { toast(e.message, true); }
+      return true;
+    } catch (e) { toast(e.message, true); return false; }
+  }
+  $$("[data-water]").forEach((b) => b.addEventListener("click", () => {
+    if (b.dataset.water === "custom") openWaterDialog(); else addWater(b.dataset.water);
   }));
+
+  /* custom water amount dialog */
+  const wd = $("#water-dialog"), wInput = $("#w-amount"), wErr = $("#w-error");
+  let wUnit = store.get("nutri-water-unit", "oz");
+  const ML_PER_OZ = 29.5735;
+  function setWaterUnit(u) {
+    wUnit = u; store.set("nutri-water-unit", u);
+    $$("#w-unit [data-unit]").forEach((x) => x.setAttribute("aria-checked", x.dataset.unit === u));
+    $$("#water-dialog [data-preset]").forEach((p) => {
+      const oz = +p.dataset.preset;
+      p.textContent = u === "ml" ? `${Math.round(oz * ML_PER_OZ / 10) * 10} ml` : `${oz} oz`;
+    });
+    wInput.step = u === "ml" ? 10 : 1;
+    wInput.placeholder = u === "ml" ? "e.g. 500" : "e.g. 12";
+    updateWaterPreview();
+  }
+  function waterOz() {
+    const v = parseFloat(wInput.value);
+    if (!(v > 0)) return 0;
+    return wUnit === "ml" ? v / ML_PER_OZ : v;
+  }
+  function updateWaterPreview() {
+    const oz = waterOz();
+    const after = day.water_oz + oz, goal = day.targets.water_oz;
+    $("#w-preview").textContent = oz
+      ? `${fmt(after, 1)} of ${fmt(goal)} oz after this${after >= goal ? " · goal reached" : ""}`
+      : `${fmt(day.water_oz, 1)} of ${fmt(goal)} oz so far today`;
+    $("#w-fill").style.transform = `scaleY(${Math.min(1, after / Math.max(1, goal))})`;
+    wErr.textContent = "";
+  }
+  function openWaterDialog() {
+    wInput.value = "";
+    setWaterUnit(wUnit);
+    if (typeof wd.showModal === "function") wd.showModal(); else wd.setAttribute("open", "");
+    setTimeout(() => wInput.focus(), 50);
+  }
+  function closeWaterDialog() {
+    wd.classList.add("is-closing");
+    setTimeout(() => { wd.classList.remove("is-closing"); wd.close ? wd.close() : wd.removeAttribute("open"); }, reduceMotion ? 0 : 180);
+  }
+  wInput.addEventListener("input", updateWaterPreview);
+  $$("#w-unit [data-unit]").forEach((b) => b.addEventListener("click", () => {
+    const oz = waterOz();
+    setWaterUnit(b.dataset.unit);
+    if (oz) wInput.value = wUnit === "ml" ? Math.round(oz * ML_PER_OZ) : +oz.toFixed(1);
+    updateWaterPreview();
+  }));
+  $$("#water-dialog [data-preset]").forEach((p) => p.addEventListener("click", () => {
+    const oz = +p.dataset.preset;
+    wInput.value = wUnit === "ml" ? Math.round(oz * ML_PER_OZ / 10) * 10 : oz;
+    updateWaterPreview();
+    wInput.focus();
+  }));
+  $("#water-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const oz = waterOz();
+    if (!(oz >= 0.5 && oz <= 200)) {
+      wErr.textContent = wUnit === "ml" ? "Enter between 15 and 5,900 ml." : "Enter between 0.5 and 200 oz.";
+      wInput.focus();
+      return;
+    }
+    const btn = $("#w-submit"); btn.disabled = true;
+    if (await addWater(+oz.toFixed(1))) closeWaterDialog();
+    btn.disabled = false;
+  });
+  $$("[data-close-water]").forEach((b) => b.addEventListener("click", closeWaterDialog));
+  wd.addEventListener("click", (e) => { if (e.target === wd) closeWaterDialog(); });
+  wd.addEventListener("cancel", (e) => { e.preventDefault(); closeWaterDialog(); });
   $("[data-water-undo]").addEventListener("click", async () => {
     try { day = await api(API.waterUndo, { date: day.date }); renderRings(); toast("Last water entry removed"); }
     catch (e) { toast(e.message, true); }

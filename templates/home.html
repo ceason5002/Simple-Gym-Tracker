@@ -6,12 +6,16 @@
 {% block head %}
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
   <link rel="stylesheet" href="{% static 'landing.css' %}">
+  <!-- Polyfills import maps on older phones (iOS Safari before 16.4); does nothing where they're supported -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
   <script type="importmap">
   { "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
   } }
   </script>
+  <!-- start the 690 KB download right away instead of after the page script is parsed -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js" crossorigin>
   <script>document.documentElement.classList.add("js")</script>
 {% endblock %}
 
@@ -107,6 +111,14 @@
 </footer>
 
 <script type="module" src="{% static 'dumbbell.js' %}"></script>
+<script>
+  // Watchdog: if the 3D code never loads (blocked CDN, very old browser, no connection),
+  // show the flat drawing instead of an empty stage.
+  setTimeout(function () {
+    var hero = document.querySelector(".hero3d");
+    if (hero && !window.__dumbbellLoaded && !hero.classList.contains("is-ready")) hero.classList.add("is-fallback");
+  }, 12000);
+</script>
 <script>
   // Scroll reveals (once); content stays visible if this never runs
   (function () {

@@ -1,0 +1,114 @@
+/* Theme settings page */
+.t-wrap{max-width:860px; margin:0 auto; padding-bottom:40px}
+/* smooth the whole page while previewing colours */
+body, .card, .nav, input, .pill{transition:background-color .35s ease, color .35s ease, border-color .35s ease}
+
+.t-tabs{
+  position:relative; display:inline-grid; grid-template-columns:1fr 1fr; margin-top:18px;
+  padding:4px; border-radius:14px; background:var(--input-bg); border:1px solid var(--border);
+}
+.t-tab{
+  all:unset; box-sizing:border-box; cursor:pointer; position:relative; z-index:1;
+  padding:9px 26px; text-align:center; font-size:14px; font-weight:600; color:var(--muted); border-radius:10px;
+}
+.t-tab::after{display:none}
+.t-tab[aria-selected="true"]{color:var(--text)}
+.t-tab:focus-visible{outline:2px solid var(--accent)}
+.t-tab-ind{
+  position:absolute; top:4px; bottom:4px; left:0; border-radius:10px;
+  background:var(--card); border:1px solid var(--border); box-shadow:0 2px 10px -4px rgba(0,0,0,.25);
+  transition:transform .35s var(--ease), width .35s var(--ease);
+}
+.t-panel[hidden]{display:none}
+
+/* starters */
+.starters{display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px}
+.starter{
+  all:unset; box-sizing:border-box; cursor:pointer; display:flex; flex-direction:column; gap:8px; align-items:center;
+  font-size:13px; font-weight:600; padding:6px; border-radius:14px; border:2px solid transparent; min-width:0;
+  transition:border-color .2s, transform .2s var(--ease);
+}
+.starter::after{display:none}
+.starter:hover{transform:translateY(-2px)}
+.starter.is-on{border-color:var(--accent)}
+.starter:focus-visible{outline:2px solid var(--accent)}
+.starter-swatch{
+  width:100%; aspect-ratio:16/10; border-radius:10px; display:flex; align-items:flex-end; gap:4px; padding:8px;
+  border:1px solid rgba(128,128,128,.3);
+}
+.starter-swatch i{flex:1; height:40%; border-radius:4px}
+.starter-swatch i:nth-child(2){height:60%}
+
+/* pickers */
+.t-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:18px}
+.t-grid .card{margin-top:18px}
+.pickers{display:flex; flex-direction:column; gap:10px}
+.picker{
+  display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center;
+  padding:10px; border-radius:14px; background:var(--input-bg); border:1px solid var(--border);
+}
+.picker-swatch{
+  position:relative; width:42px; height:42px; margin:0; border-radius:12px; overflow:hidden; cursor:pointer;
+  border:1px solid rgba(128,128,128,.35); box-shadow:0 2px 8px -3px rgba(0,0,0,.35);
+}
+.picker-swatch{background:var(--swatch, #888)}
+/* the native picker sits invisibly on top; the label itself shows the colour */
+.picker-swatch input[type=color]{
+  position:absolute; inset:0; width:100% !important; height:100% !important;
+  padding:0 !important; border:0 !important; opacity:0; cursor:pointer;
+}
+.picker-swatch:focus-within{outline:2px solid var(--accent); outline-offset:2px}
+.picker-name{display:block; font-weight:600; font-size:14px}
+.picker-hint{display:block; font-size:12px}
+.hex{
+  width:96px !important; padding:9px 10px !important; text-align:center;
+  font:600 13px ui-monospace, "SF Mono", Menlo, monospace !important; text-transform:lowercase;
+}
+.hex.is-bad{border-color:#ef4444 !important; box-shadow:0 0 0 3px rgba(239,68,68,.2) !important}
+.small{font-size:13px; margin:12px 2px 0}
+
+/* preview */
+.contrast{font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid var(--border)}
+.contrast[data-level="ok"]{color:#22c55e; border-color:rgba(34,197,94,.4); background:rgba(34,197,94,.1)}
+.contrast[data-level="warn"]{color:#f59e0b; border-color:rgba(245,158,11,.4); background:rgba(245,158,11,.1)}
+.contrast[data-level="bad"]{color:#ef4444; border-color:rgba(239,68,68,.4); background:rgba(239,68,68,.1)}
+.preview{padding:14px; border-radius:16px; background:var(--bg); border:1px solid var(--border)}
+.pv-nav{display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; background:var(--card); border:1px solid var(--border); font-size:12px; font-weight:600}
+.pv-mark{width:18px; height:18px; border-radius:6px; background:linear-gradient(135deg, var(--accent), var(--glow))}
+.pv-brand{flex:1}
+.pv-pill{padding:4px 10px; border-radius:999px; background:var(--accent-soft); border:1px solid var(--border)}
+.pv-card{display:flex; gap:14px; align-items:center; margin-top:12px; padding:14px; border-radius:14px; background:var(--card); border:1px solid var(--border)}
+.pv-ring{position:relative; width:72px; height:72px; flex:none; display:grid; place-items:center; font-size:14px}
+.pv-ring svg{position:absolute; inset:0; transform:rotate(-90deg)}
+.pv-ring circle{fill:none; stroke-width:10}
+.pv-track{stroke:color-mix(in srgb, var(--text) 10%, transparent)}
+.pv-bar{stroke:var(--accent); stroke-linecap:round; stroke-dasharray:251; stroke-dashoffset:95; filter:drop-shadow(0 0 5px var(--accent))}
+.pv-title{font-weight:700}
+.pv-muted{font-size:12px; color:var(--muted); margin:2px 0 10px}
+.pv-btn{display:inline-block; padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600; border:1px solid var(--accent); box-shadow:0 6px 18px -8px var(--accent)}
+
+.t-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:18px}
+.t-actions .pill{cursor:pointer; font-family:inherit; font-size:15px; color:var(--text)}
+.t-actions .pill::after{display:none}
+.t-actions button[type=submit]{width:auto}
+.t-actions button:disabled{opacity:.5; cursor:not-allowed}
+
+@media (max-width:720px){
+  .t-grid{grid-template-columns:1fr; gap:0}
+  .t-actions button[type=submit]{flex:1}
+  .starters{grid-template-columns:repeat(3, minmax(0, 1fr))}
+  .picker-hint{display:none}
+  .hex{width:86px !important}
+}
+@media (prefers-reduced-motion: reduce){
+  body, .card, .nav, input, .pill, .t-tab-ind, .starter{transition:none}
+}
+
+@media (max-width:359px){
+  .picker{grid-template-columns:auto 1fr; row-gap:8px}
+  .picker .hex{grid-column:1 / -1; width:100% !important}
+}
+.t-actions button{width:auto; margin:0}
+.t-actions .pill{flex:none; padding:12px 22px}
+.t-actions button[type=submit]{flex:0 1 auto; white-space:nowrap}
+@media (max-width:720px){ .t-actions button[type=submit]{flex:1} }

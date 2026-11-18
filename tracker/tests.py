@@ -185,3 +185,59 @@ class ApiTests(TestCase):
         p = NutritionProfile.objects.get(user=self.user)
         self.assertEqual(p.goal, "lose")
         self.assertTrue(self.client.get(reverse("nutrition_api_day")).json()["targets"]["complete"])
+
+
+from . import theme as theme_mod
+
+
+class CustomThemeTests(TestCase):
+    good = {"bg": "#101010", "card": "#1a1a1a", "text": "#f0f0f0", "accent": "#3366ff"}
+
+    def test_clean_accepts_hex_and_lowercases(self):
+        self.assertEqual(theme_mod.clean_custom({**self.good, "accent": "#3366FF"})["accent"], "#3366ff")
+
+    def test_clean_rejects_css_injection_and_bad_values(self):
+        for bad in ("red", "#12345", "#1234567", "#101010;}body{display:none", "</style><script>", ""):
+            with self.assertRaises(ValueError, msg=bad):
+                theme_mod.clean_custom({**self.good, "bg": bad})
+
+    def test_clean_rejects_unreadable_contrast(self):
+        with self.assertRaises(ValueError):
+            theme_mod.clean_custom({**self.good, "text": "#141414"})
+
+    def test_build_derives_muted_and_border(self):
+        t = theme_mod.build_custom(self.good)
+        self.assertEqual(set(t), {"bg", "card", "text", "accent", "muted", "border"})
+        self.assertTrue(all(theme_mod.HEX_RE.match(v) for v in t.values()))
+
+    def test_build_falls_back_on_corrupt_data(self):
+        self.assertEqual(theme_mod.build_custom({"bg": "nope"})["bg"], theme_mod.CUSTOM_DEFAULT["bg"])
+
+
+@override_settings(STORAGES={"staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}})
+class CustomThemeViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("th", password="x")
+        self.client.force_login(self.user)
+
+    def test_save_custom_theme_applies_to_pages(self):
+        r = self.client.post(reverse("theme_settings"), {"theme": "custom", **CustomThemeTests.good})
+        self.assertRedirects(r, reverse("theme_settings"))
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.theme, "custom")
+        page = self.client.get(reverse("dashboard")).content.decode()
+        self.assertIn("--accent: #3366ff", page)
+
+    def test_rejected_custom_theme_is_not_saved(self):
+        r = self.client.post(reverse("theme_settings"), {"theme": "custom", **CustomThemeTests.good,
+                                                         "bg": "#000;}body{display:none"})
+        self.assertEqual(r.status_code, 400)
+        self.user.profile.refresh_from_db()
+        self.assertNotEqual(self.user.profile.theme, "custom")
+        self.assertNotIn("display:none", r.content.decode().split("</style>")[0])
+
+    def test_preset_still_works(self):
+        self.client.post(reverse("theme_settings"), {"theme": "pink_white_red"})
+        self.user.profile.refresh_from_db()
+        self.assertEqual(self.user.profile.theme, "pink_white_red")
+        self.assertContains(self.client.get(reverse("theme_settings")), 'data-panel="custom"')
